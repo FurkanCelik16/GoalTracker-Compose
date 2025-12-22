@@ -10,10 +10,11 @@ import com.example.goaltracker.MainActivity
 import com.example.goaltracker.R
 
 object NotificationHelper {
+
     private const val CHANNEL_ID = "goal_reminders"
     private const val CHANNEL_NAME = "Hedef Hatırlatıcıları"
 
-    fun showNotification(context: Context, goalId: Int, string: String, string1: String) {
+    fun showNotification(context: Context, goalId: Int, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val channel = NotificationChannel(
@@ -21,28 +22,31 @@ object NotificationHelper {
             CHANNEL_NAME,
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Hedef hatırlatmaları"
+            description = "Hedef hatırlatmaları ve motivasyon bildirimleri"
             enableVibration(true)
         }
         notificationManager.createNotificationChannel(channel)
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            goalId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = NotificationCompat.Builder(context, "notification_channel_id")
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Hedefini Unutma!")
-            .setContentText("Bugünkü hedeflerini tamamlamak için harika bir zaman.")
+            .setContentTitle(title)
+            .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
+
         notificationManager.notify(goalId, notification)
     }
 }

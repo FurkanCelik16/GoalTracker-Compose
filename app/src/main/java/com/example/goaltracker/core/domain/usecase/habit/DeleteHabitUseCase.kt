@@ -1,0 +1,11 @@
+package com.example.goaltracker.core.domain.usecase.habit
+
+import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.model.Habit
+import javax.inject.Inject
+
+class DeleteHabitUseCase @Inject constructor(private val repository: HabitRepository) {
+    suspend operator fun invoke(habit: Habit){
+        repository.deleteHabit(habit)
+    }
+}

@@ -11,10 +11,9 @@ import com.example.goaltracker.core.domain.usecase.goal.GetGoalDetailUseCase
 import com.example.goaltracker.core.domain.usecase.goal.GetGoalHistoryUseCase
 import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalUseCase
 import com.example.goaltracker.core.domain.usecase.goal.DeleteGoalUseCase
+import com.example.goaltracker.core.domain.usecase.goal.GetGoalChartDataUseCase
 import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalProgressUseCase
 import com.example.goaltracker.core.model.Goal
-import com.example.goaltracker.core.model.GoalHistoryEntity
-import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.ReminderType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +22,6 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +33,7 @@ class GoalDetailViewModel @Inject constructor(
     private val deleteGoalUseCase: DeleteGoalUseCase,
     private val deleteChallengeUseCase: DeleteChallengeUseCase,
     private val checkChallengeProgressUseCase: CheckChallengeProgressUseCase,
+    private val getGoalChartDataUseCase: GetGoalChartDataUseCase,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -54,8 +53,13 @@ class GoalDetailViewModel @Inject constructor(
     private val _chartSelectedDate = MutableStateFlow(LocalDate.now())
     val chartSelectedDate = _chartSelectedDate.asStateFlow()
 
-    val chartData = combine(history, _chartTimeRange, _chartSelectedDate, goal) { historyList, range, date, currentGoal ->
-        calculateChartData(historyList, range, date, currentGoal)
+    val chartData = combine(
+        history,
+        _chartTimeRange,
+        _chartSelectedDate,
+        goal
+    ) { historyList, range, date, currentGoal ->
+        getGoalChartDataUseCase(historyList, range, date, currentGoal) // 👈 UseCase'e devredildi
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun updateChartRange(range: ChartTimeRange) { _chartTimeRange.value = range }
@@ -111,69 +115,6 @@ class GoalDetailViewModel @Inject constructor(
                 checkChallengeProgressUseCase(parentTitle, date)
             }
         }
-    }
-    private fun calculateChartData(
-        history: List<GoalHistoryEntity>,
-        rangeType: ChartTimeRange,
-        selectedDate: LocalDate,
-        goal: Goal?
-    ): List<GoalHistoryEntity> {
-        if (goal == null) return emptyList()
-
-        val zoneId = ZoneId.systemDefault()
-        val today = LocalDate.now()
-        val isAccumulative = goal.type == GoalType.ACCUMULATIVE
-        val (startDate, endDate) = if (rangeType == ChartTimeRange.WEEK) {
-            selectedDate.minusDays(6) to selectedDate
-        } else {
-            val yearMonth = java.time.YearMonth.from(selectedDate)
-            yearMonth.atDay(1) to yearMonth.atEndOfMonth()
-        }
-
-        val daysBetween = ChronoUnit.DAYS.between(startDate, endDate).toInt()
-        val fullDataList = mutableListOf<GoalHistoryEntity>()
-        val startMillis = startDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
-
-        var runningTotal = if (isAccumulative) {
-            history.filter { it.date < startMillis }
-                .map { it.value }
-                .sum()
-        } else {
-            0f
-        }
-
-        for (i in 0..daysBetween) {
-            val dateCheck = startDate.plusDays(i.toLong())
-            val dateMillis = dateCheck.atStartOfDay(zoneId).toInstant().toEpochMilli()
-            val isFuture = dateCheck.isAfter(today)
-            val dailyIncrement = history.filter {
-                val hDate = Instant.ofEpochMilli(it.date).atZone(zoneId).toLocalDate()
-                hDate.isEqual(dateCheck)
-            }.sumOf { it.value.toDouble() }.toFloat()
-
-            val chartValue = if (isAccumulative) {
-                runningTotal += dailyIncrement
-                runningTotal
-            } else {
-                dailyIncrement
-            }
-
-            val finalValue = if (isFuture && dailyIncrement == 0f) {
-                if (isAccumulative) runningTotal else 0f
-            } else {
-                chartValue
-            }
-
-            fullDataList.add(
-                GoalHistoryEntity(
-                    id = i,
-                    goalId = goal.id,
-                    value = finalValue,
-                    date = dateMillis
-                )
-            )
-        }
-        return fullDataList
     }
     fun setReminder(goal: Goal, type: ReminderType, start: String, end: String?, interval: Int) {
         viewModelScope.launch {

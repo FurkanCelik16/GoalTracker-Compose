@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.example.goaltracker.core.data.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
 import com.example.goaltracker.core.model.ReminderType
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn

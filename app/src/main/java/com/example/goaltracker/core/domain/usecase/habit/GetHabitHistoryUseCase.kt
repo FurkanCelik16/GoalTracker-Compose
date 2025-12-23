@@ -1,6 +1,6 @@
 package com.example.goaltracker.core.domain.usecase.habit
 
-import com.example.goaltracker.core.data.repository.AnalysisRepository
+import com.example.goaltracker.core.domain.repository.AnalysisRepository
 import com.example.goaltracker.core.model.HabitEntry
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

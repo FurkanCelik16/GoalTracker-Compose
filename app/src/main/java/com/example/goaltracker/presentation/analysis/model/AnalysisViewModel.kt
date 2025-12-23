@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.goaltracker.core.data.repository.AnalysisRepository
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.AnalysisRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import com.example.goaltracker.core.model.HabitDifficulty
 import com.example.goaltracker.core.model.HabitType
 import dagger.hilt.android.lifecycle.HiltViewModel

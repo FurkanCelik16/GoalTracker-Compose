@@ -2,9 +2,9 @@ package com.example.goaltracker.presentation.settings.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.goaltracker.core.data.repository.GoalRepository
-import com.example.goaltracker.core.data.repository.HabitRepository
-import com.example.goaltracker.core.data.repository.SettingsRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn

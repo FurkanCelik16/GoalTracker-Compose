@@ -2,7 +2,7 @@ package com.example.goaltracker.presentation.home.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import com.example.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
 import com.example.goaltracker.core.domain.usecase.challenge.DeleteChallengeUseCase
 import com.example.goaltracker.core.domain.usecase.goal.CheckAndResetRecurringGoalsUseCase

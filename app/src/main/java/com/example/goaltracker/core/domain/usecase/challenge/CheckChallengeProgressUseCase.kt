@@ -1,7 +1,7 @@
 package com.example.goaltracker.core.domain.usecase.challenge
 
-import com.example.goaltracker.core.data.repository.GoalRepository
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import com.example.goaltracker.core.model.GoalType
 import java.time.LocalDate
 import javax.inject.Inject

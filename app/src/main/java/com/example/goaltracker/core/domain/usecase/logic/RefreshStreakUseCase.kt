@@ -1,6 +1,6 @@
 package com.example.goaltracker.core.domain.usecase.logic
 
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import com.example.goaltracker.core.domain.util.StreakCalculator
 import javax.inject.Inject
 

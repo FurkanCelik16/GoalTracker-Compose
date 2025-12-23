@@ -8,8 +8,8 @@ import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.Habit
 import com.example.goaltracker.core.model.Period
 import com.example.goaltracker.core.model.sampleChallenges
-import com.example.goaltracker.core.data.repository.GoalRepository
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

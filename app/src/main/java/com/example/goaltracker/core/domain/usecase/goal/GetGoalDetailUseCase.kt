@@ -1,6 +1,6 @@
 package com.example.goaltracker.core.domain.usecase.goal
 
-import com.example.goaltracker.core.data.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
 import com.example.goaltracker.core.model.Goal
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

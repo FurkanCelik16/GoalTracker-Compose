@@ -1,7 +1,7 @@
 package com.example.goaltracker.core.domain.usecase.challenge
 
-import com.example.goaltracker.core.data.repository.GoalRepository
-import com.example.goaltracker.core.data.repository.HabitRepository
+import com.example.goaltracker.core.domain.repository.GoalRepository
+import com.example.goaltracker.core.domain.repository.HabitRepository
 import javax.inject.Inject
 
 class DeleteChallengeUseCase @Inject constructor(

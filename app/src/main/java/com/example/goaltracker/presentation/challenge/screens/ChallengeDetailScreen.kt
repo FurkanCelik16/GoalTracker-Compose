@@ -20,20 +20,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.DeleteConfirmDialog
-import com.example.goaltracker.core.model.Challenge
 import com.example.goaltracker.presentation.challenge.components.ResultItem
 import com.example.goaltracker.presentation.challenge.components.TimelineItem
 import com.example.goaltracker.core.theme.TextWhiteTransparent
 import com.example.goaltracker.presentation.challenge.model.ChallengeViewModel
 import com.example.goaltracker.presentation.challenge.components.StartChallengeDialog
+import com.example.goaltracker.presentation.challenge.model.ChallengeDetailViewModel
 
 @Composable
 fun ChallengeDetailScreen(
-    challenge: Challenge,
     onBack: () -> Unit,
-    viewModel: ChallengeViewModel = hiltViewModel()
+    viewModel: ChallengeDetailViewModel = hiltViewModel(),
+    challengeViewModel: ChallengeViewModel = hiltViewModel()
 ) {
-    val activeTitles by viewModel.activeChallengeTitles.collectAsStateWithLifecycle()
+    val challengeState by viewModel.challenge.collectAsStateWithLifecycle()
+    val activeTitles by challengeViewModel.activeChallengeTitles.collectAsStateWithLifecycle()
+    val challenge = challengeState ?: return
     val isJoined = activeTitles.contains(challenge.title)
     val hasAnyActiveChallenge = activeTitles.isNotEmpty()
     var showStartDialog by remember { mutableStateOf(false) }
@@ -177,7 +179,7 @@ fun ChallengeDetailScreen(
             challenge = challenge,
             onDismiss = { showStartDialog = false },
             onConfirm = {
-                viewModel.startChallenge(challenge) {
+                challengeViewModel.startChallenge(challenge) {
                     showStartDialog = false
                 }
             }
@@ -187,7 +189,7 @@ fun ChallengeDetailScreen(
         DeleteConfirmDialog(
             onDismissDelete = { showLeaveDialog = false },
             onConfirmDelete = {
-                viewModel.cancelChallenge(challenge) {
+                challengeViewModel.cancelChallenge(challenge) {
                     showLeaveDialog = false
                 }
             },

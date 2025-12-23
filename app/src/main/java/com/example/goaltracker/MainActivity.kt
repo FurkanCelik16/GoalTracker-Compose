@@ -20,7 +20,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.goaltracker.core.common.ui.components.BottomMenu
-import com.example.goaltracker.core.model.sampleChallenges
 import com.example.goaltracker.core.theme.GoalTrackerTheme
 import com.example.goaltracker.presentation.analysis.screens.AnalysisScreen
 import com.example.goaltracker.presentation.challenge.screens.ChallengeDetailScreen
@@ -112,8 +111,7 @@ class MainActivity : ComponentActivity() {
                             route = GoalTrackerDestinations.HabitDetail.route,
                             arguments = listOf(navArgument("habitId") { type = NavType.IntType })
                         ) { backStackEntry ->
-                            val habitId = backStackEntry.arguments?.getInt("habitId") ?: 0
-                            HabitDetailScreen(navController, habitId)
+                            HabitDetailScreen(navController)
                         }
 
                         // 3. İSTATİSTİKLER
@@ -143,20 +141,20 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // 6. MÜCADELELER LİSTESİ (KEŞFET EKRANI)
+                        // 6. MÜCADELELER LİSTESİ
                         composable(GoalTrackerDestinations.Challenges.route) {
-                            ChallengeScreen()
+                            ChallengeScreen(onNavigateToDetail = { challengeId ->
+                                navController.navigate(
+                                    GoalTrackerDestinations.ChallengeDetail.createRoute(challengeId)
+                                )
+                            })
                         }
 
                         composable(
                             route = GoalTrackerDestinations.ChallengeDetail.route,
                             arguments = listOf(navArgument("challengeId") { type = NavType.IntType })
                         ) { backStackEntry ->
-                            val challengeId = backStackEntry.arguments?.getInt("challengeId") ?: return@composable
-                            val challenge = sampleChallenges.find { it.id == challengeId } ?: return@composable
-
                             ChallengeDetailScreen(
-                                challenge = challenge,
                                 onBack = { navController.popBackStack() },
                             )
                         }

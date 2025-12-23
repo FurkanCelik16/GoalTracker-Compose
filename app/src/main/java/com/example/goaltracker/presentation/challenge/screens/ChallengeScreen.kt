@@ -17,6 +17,7 @@ import com.example.goaltracker.presentation.challenge.components.ChallengeCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChallengeScreen(
+    onNavigateToDetail: (Int) -> Unit,
     viewModel: ChallengeViewModel = hiltViewModel()
 ) {
     val challenges by viewModel.challenges.collectAsStateWithLifecycle()
@@ -41,15 +42,10 @@ fun ChallengeScreen(
                 items(challenges) { challenge ->
                     ChallengeCard(
                         challenge = challenge,
-                        onClick = { selectedChallenge = challenge }
+                        onClick = { onNavigateToDetail(challenge.id) }
                     )
                 }
             }
         }
-    } else {
-        ChallengeDetailScreen(
-            challenge = selectedChallenge!!,
-            onBack = { selectedChallenge = null },
-        )
     }
 }

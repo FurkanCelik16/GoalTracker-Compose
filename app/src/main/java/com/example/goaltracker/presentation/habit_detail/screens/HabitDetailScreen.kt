@@ -27,17 +27,16 @@ import com.example.goaltracker.presentation.habit_detail.components.HeatMapCard
 import com.example.goaltracker.presentation.habit_detail.components.PurposeCard
 import com.example.goaltracker.presentation.habit_detail.components.StreakCard
 import com.example.goaltracker.presentation.habit_detail.dialog.HabitDetailDialogs
-import com.example.goaltracker.presentation.home.model.HomeViewModel
+import com.example.goaltracker.presentation.habit_detail.model.HabitDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(
     navController: NavController,
-    habitId: Int,
-    homeViewModel: HomeViewModel = hiltViewModel()
+    viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
-    val habitState by homeViewModel.getHabitFlow(habitId).collectAsStateWithLifecycle(initialValue = null)
-    val historyState by homeViewModel.getHabitHistory(habitId).collectAsStateWithLifecycle(initialValue = emptyList())
+    val habitState by viewModel.habit.collectAsStateWithLifecycle()
+    val historyState by viewModel.history.collectAsStateWithLifecycle()
 
     val backgroundColor = if (isSystemInDarkTheme()) {
         MaterialTheme.colorScheme.background
@@ -110,13 +109,13 @@ fun HabitDetailScreen(
         showPurposeDialog = dialogController.isAddOpen,
         onDismissPurpose = dialogController::closeAddDialog,
         onSavePurpose = { newText ->
-            homeViewModel.updateHabit(habit.copy(detail = newText))
+            viewModel.updateHabit(habit.copy(detail = newText))
             dialogController.closeAddDialog()
         },
         showEditDialog = dialogController.isEditOpen,
         onDismissEdit = dialogController::closeEditDialog,
         onSaveEdit = { name, category, period, difficulty, type, timeOfDay, days, interval, target ->
-            homeViewModel.updateHabit(
+            viewModel.updateHabit(
                 habit.copy(
                     name = name,
                     category = category,
@@ -134,9 +133,10 @@ fun HabitDetailScreen(
         showDeleteDialog = dialogController.isDeleteOpen,
         onDismissDelete = dialogController::closeDeleteConfirm,
         onConfirmDelete = {
-            homeViewModel.deleteHabit(habit)
-            dialogController.closeDeleteConfirm()
-            navController.popBackStack()
+            viewModel.deleteHabit(habit) {
+                dialogController.closeDeleteConfirm()
+                navController.popBackStack()
+            }
         }
     )
 }

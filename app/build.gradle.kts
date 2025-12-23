@@ -82,9 +82,6 @@ dependencies {
     implementation("com.patrykandpatrick.vico:compose-m3:1.13.1")
     implementation("com.patrykandpatrick.vico:core:1.13.1")
 
-    // 7. WorkManager
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-
     // Core Hilt
     implementation("com.google.dagger:hilt-android:2.48.1")
     kapt("com.google.dagger:hilt-android-compiler:2.48.1")

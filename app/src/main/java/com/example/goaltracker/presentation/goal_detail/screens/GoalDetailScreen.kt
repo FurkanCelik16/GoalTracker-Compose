@@ -27,6 +27,7 @@ import com.example.goaltracker.presentation.goal_detail.dialog.GoalReminderDialo
 import com.example.goaltracker.presentation.goal_detail.dialog.PermissionRationaleDialog
 import com.example.goaltracker.presentation.goal_detail.model.GoalDetailViewModel
 import java.time.LocalDate
+import androidx.core.net.toUri
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -208,7 +209,6 @@ fun GoalDetailScreen(
             onDismiss = { showRationaleDialog = false }
         )
     }
-
     GoalDetailDialogs(
         goal = goal,
         showDatePicker = showDatePicker,
@@ -229,11 +229,51 @@ fun GoalDetailScreen(
             showDeleteDialog = false
         }
     )
+
+    var showExactAlarmPermissionDialog by remember { mutableStateOf(false) }
+
+    if (showExactAlarmPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showExactAlarmPermissionDialog = false },
+            title = { Text("Alarm İzni Gerekli ⏰") },
+            text = { Text("Hatırlatıcıların tam zamanında çalabilmesi için ayarlardan 'Alarmlar ve Hatırlatıcılar' iznini açman gerekiyor.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExactAlarmPermissionDialog = false
+                    val intent = android.content.Intent(
+                        android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        "package:${context.packageName}".toUri()
+                    )
+                    context.startActivity(intent)
+                }) {
+                    Text("Ayarları Aç")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExactAlarmPermissionDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+
     if (showReminderDialog && goal != null) {
         GoalReminderDialog(
             currentGoal = goal!!,
             onDismiss = { showReminderDialog = false },
             onSave = { type, start, end, interval ->
+                if (type == ReminderType.NONE) {
+                    viewModel.setReminder(goal!!, type, start, end, interval)
+                    showReminderDialog = false
+                    return@GoalReminderDialog
+                }
+                val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
+
+                if (!alarmManager.canScheduleExactAlarms()) {
+                    showExactAlarmPermissionDialog = true
+                    return@GoalReminderDialog
+                }
+
                 viewModel.setReminder(goal!!, type, start, end, interval)
                 showReminderDialog = false
             }

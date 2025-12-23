@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.goaltracker.core.alarm.AlarmScheduler
 import com.example.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
 import com.example.goaltracker.core.domain.usecase.challenge.DeleteChallengeUseCase
 import com.example.goaltracker.core.domain.usecase.goal.GetGoalDetailUseCase
@@ -15,7 +16,6 @@ import com.example.goaltracker.core.model.Goal
 import com.example.goaltracker.core.model.GoalHistoryEntity
 import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.ReminderType
-import com.example.goaltracker.core.worker.GoalReminderWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -87,6 +87,7 @@ class GoalDetailViewModel @Inject constructor(
         val currentGoal = goal.value ?: return
 
         viewModelScope.launch {
+            AlarmScheduler.cancelAlarm(context, currentGoal.id)
             val challengeTitleToDelete = when {
                 currentGoal.isChallengeMaster -> currentGoal.title
                 currentGoal.parentChallengeTitle != null -> currentGoal.parentChallengeTitle
@@ -184,17 +185,10 @@ class GoalDetailViewModel @Inject constructor(
             )
             updateGoalUseCase(updatedGoal)
 
-            if (type != ReminderType.NONE) {
-                GoalReminderWorker.scheduleNextReminder(
-                    context = context,
-                    goalId = goal.id,
-                    type = type,
-                    startTimeStr = start,
-                    endTimeStr = end,
-                    intervalHours = interval
-                )
+            if (type == ReminderType.NONE) {
+                AlarmScheduler.cancelAlarm(context, updatedGoal.id)
             } else {
-                GoalReminderWorker.cancelReminder(context, goal.id)
+                AlarmScheduler.scheduleAlarm(context, updatedGoal)
             }
         }
     }

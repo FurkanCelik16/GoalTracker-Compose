@@ -85,7 +85,7 @@ fun SettingsScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopBar(title = "Ayarlar", text = "Uygulama Yönetimi")
+            TopBar(title = "Ayarlar", text = "Uygulamanı Kişiselleştir.")
         }
     ) { paddingValues ->
         Column(

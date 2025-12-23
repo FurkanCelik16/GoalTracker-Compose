@@ -59,7 +59,7 @@ class GoalDetailViewModel @Inject constructor(
         _chartSelectedDate,
         goal
     ) { historyList, range, date, currentGoal ->
-        getGoalChartDataUseCase(historyList, range, date, currentGoal) // 👈 UseCase'e devredildi
+        getGoalChartDataUseCase(historyList, range, date, currentGoal)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun updateChartRange(range: ChartTimeRange) { _chartTimeRange.value = range }

@@ -1,36 +1,30 @@
 package com.example.goaltracker.presentation.goal_detail.screens
 
-import BinaryGoalCard
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.app.AlarmManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.goaltracker.R
 import com.example.goaltracker.core.common.util.formatAmount
 import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.ReminderType
-import com.example.goaltracker.presentation.goal_detail.components.*
 import com.example.goaltracker.presentation.goal_detail.dialog.GoalDetailDialogs
 import com.example.goaltracker.presentation.goal_detail.dialog.GoalReminderDialog
 import com.example.goaltracker.presentation.goal_detail.dialog.PermissionRationaleDialog
 import com.example.goaltracker.presentation.goal_detail.model.GoalDetailViewModel
 import java.time.LocalDate
-import androidx.core.net.toUri
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.goaltracker.R
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +37,6 @@ fun GoalDetailScreen(
     val chartData by viewModel.chartData.collectAsStateWithLifecycle()
     val timeRange by viewModel.chartTimeRange.collectAsStateWithLifecycle()
     val chartDate by viewModel.chartSelectedDate.collectAsStateWithLifecycle()
-    val history by viewModel.history.collectAsStateWithLifecycle()
 
     var inputAmount by remember { mutableStateOf("") }
     var selectedEntryDate by remember { mutableStateOf(LocalDate.now()) }
@@ -52,9 +45,8 @@ fun GoalDetailScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showReminderDialog by remember { mutableStateOf(false) }
-
     var showRationaleDialog by remember { mutableStateOf(false) }
-
+    var showExactAlarmPermissionDialog by remember { mutableStateOf(false) }
     var deleteWarningMessage by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
@@ -62,11 +54,7 @@ fun GoalDetailScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            showReminderDialog = true
-        } else {
-            //To-Do
-        }
+        if (isGranted) showReminderDialog = true
     }
 
     val datePickerState = rememberDatePickerState(
@@ -76,133 +64,67 @@ fun GoalDetailScreen(
         }
     )
 
-    LaunchedEffect(selectedEntryDate, history, goal) {
+    LaunchedEffect(selectedEntryDate, goal) {
         val currentGoal = goal ?: return@LaunchedEffect
-
         if (currentGoal.type == GoalType.RECURRING) {
             val amountOnDate = viewModel.getProgressForDate(selectedEntryDate)
             inputAmount = amountOnDate.formatAmount()
         }
     }
 
-    Scaffold(
-        topBar = {
+    GoalDetailContent(
+        goal = goal,
+        chartData = chartData,
+        timeRange = timeRange,
+        chartDate = chartDate,
+        inputAmount = inputAmount,
+        selectedEntryDate = selectedEntryDate,
+        onBackClick = onBackClick,
+        onEditClick = { showEditDialog = true },
+        onDeleteClick = {
+            val currentGoal = goal ?: return@GoalDetailContent
+            val isPart = currentGoal.parentChallengeTitle != null
+            val isFlagged = currentGoal.isChallenge || currentGoal.isChallengeMaster
+
+            if (isPart || isFlagged) {
+                val name = currentGoal.parentChallengeTitle ?: currentGoal.title
+                deleteWarningMessage = context.getString(R.string.challenge_delete_warning, name)
+            } else {
+                deleteWarningMessage = null
+            }
+            showDeleteDialog = true
+        },
+        onReminderClick = {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context, POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (hasPermission) {
+                showReminderDialog = true
+            } else {
+                showRationaleDialog = true
+            }
+        },
+        onChartRangeSelected = { viewModel.updateChartRange(it) },
+        onChartDateChanged = { viewModel.updateChartDate(it) },
+        onInputValueChange = { inputAmount = it },
+        onInputDateClick = { showDatePicker = true },
+        onSaveProgress = {
             goal?.let { currentGoal ->
-                GoalDetailTopBar(
-                    title = currentGoal.title,
-                    onBackClick = onBackClick,
-                    onEditClick = { showEditDialog = true },
-                    onDeleteClick = {
-                        val isPart = currentGoal.parentChallengeTitle != null
-                        val isFlagged = currentGoal.isChallenge || currentGoal.isChallengeMaster
-
-                        if (isPart || isFlagged) {
-                            val name = currentGoal.parentChallengeTitle ?: currentGoal.title
-                            deleteWarningMessage = context.getString(R.string.challenge_delete_warning, name)
-                        } else {
-                            deleteWarningMessage = null
-                        }
-                        showDeleteDialog = true
-                    },
-                    onReminderClick = {
-                        val hasPermission = ContextCompat.checkSelfPermission(
-                            context,
-                            POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
-
-                        if (hasPermission) {
-                            showReminderDialog = true
-                        } else {
-                            showRationaleDialog = true
-                        }
-                    },
-                    hasReminder = currentGoal.reminderType != ReminderType.NONE
-                )
-            }
-        }
-    ) { padding ->
-        if (goal == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            val currentGoal = goal!!
-            val isBinary = currentGoal.type == GoalType.BINARY
-            val isAccumulative = currentGoal.type == GoalType.ACCUMULATIVE
-            val isRecurring = currentGoal.type == GoalType.RECURRING
-            val isCompleted = currentGoal.currentAmount >= currentGoal.targetAmount
-
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-
-                if (isBinary) {
-                    BinaryGoalCard(isCompleted = isCompleted) {
-                        viewModel.updateProgress(if (isCompleted) 0f else 1f)
+                inputAmount.toFloatOrNull()?.let { amount ->
+                    viewModel.addProgress(currentGoal, amount, selectedEntryDate)
+                    if (currentGoal.type != GoalType.RECURRING) {
+                        inputAmount = ""
                     }
-                } else {
-                    if (isAccumulative && isCompleted) {
-                        SuccessCard(
-                            message = stringResource(id = R.string.congratulations),
-                            subMessage = stringResource(id = R.string.goal_completed),
-                            onUndo = { viewModel.updateProgress(currentGoal.targetAmount - 1f) }
-                        )
-                    }
-
-                    GoalChartSection(
-                        history = chartData,
-                        targetAmount = currentGoal.targetAmount,
-                        isRecurring = isRecurring,
-                        timeRange = timeRange,
-                        selectedDate = chartDate,
-                        onRangeSelected = { viewModel.updateChartRange(it) },
-                        onDateChanged = { viewModel.updateChartDate(it) }
-                    )
-
-                    GoalStatsSection(
-                        currentAmount = if(isRecurring) inputAmount.toFloatOrNull() ?: 0f else currentGoal.currentAmount,
-                        targetAmount = currentGoal.targetAmount,
-                        isRecurring = isRecurring,
-                        isAccumulative = isAccumulative,
-                        isCompleted = isCompleted,
-                        inputAmount = inputAmount,
-                        onInputValueChange = { newValue ->
-                            inputAmount = newValue.toString()
-                        }
-                    )
-
-                    HorizontalDivider()
-
-                    GoalInputSection(
-                        isAccumulative = isAccumulative,
-                        inputAmount = inputAmount,
-                        onInputChange = { inputAmount = it },
-                        selectedDate = selectedEntryDate,
-                        onDateClick = { showDatePicker = true },
-                        onSaveClick = {
-                            inputAmount.toFloatOrNull()?.let { amount ->
-                                viewModel.addProgress(currentGoal, amount, selectedEntryDate)
-
-                                if (!isRecurring) {
-                                    inputAmount = ""
-                                }
-                            }
-                        }
-                    )
                 }
-
-                Spacer(modifier = Modifier.height(100.dp))
             }
-        }
-    }
+        },
+        onUndoClick = {
+            goal?.let { viewModel.updateProgress(it.targetAmount - 1f) }
+        },
+        onUpdateBinaryProgress = { viewModel.updateProgress(it) }
+    )
+
     if (showRationaleDialog) {
         PermissionRationaleDialog(
             onConfirm = {
@@ -212,6 +134,7 @@ fun GoalDetailScreen(
             onDismiss = { showRationaleDialog = false }
         )
     }
+
     GoalDetailDialogs(
         goal = goal,
         showDatePicker = showDatePicker,
@@ -232,8 +155,6 @@ fun GoalDetailScreen(
             showDeleteDialog = false
         }
     )
-
-    var showExactAlarmPermissionDialog by remember { mutableStateOf(false) }
 
     if (showExactAlarmPermissionDialog) {
         AlertDialog(
@@ -270,7 +191,7 @@ fun GoalDetailScreen(
                     showReminderDialog = false
                     return@GoalReminderDialog
                 }
-                val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
                 if (!alarmManager.canScheduleExactAlarms()) {
                     showExactAlarmPermissionDialog = true

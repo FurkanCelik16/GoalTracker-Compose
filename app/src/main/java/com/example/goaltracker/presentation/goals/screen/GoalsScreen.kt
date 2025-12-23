@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.TopBar
-import com.example.goaltracker.core.model.sampleChallenges
 import com.example.goaltracker.presentation.goals.components.ChallengeMasterCard
 import com.example.goaltracker.presentation.goals.components.GoalCard
 import com.example.goaltracker.presentation.goals.dialog.AddGoalSheet
@@ -79,8 +78,8 @@ fun GoalsScreen(
                     ) { index ->
                         val goal = goals[index]
                         if (goal.isChallengeMaster) {
-                            val matchedChallenge = sampleChallenges.find { it.title == goal.title }
-                            ChallengeMasterCard(goal = goal, onItemClick = { onChallengeClick(matchedChallenge!!.id) })
+                            val challengeId = viewModel.getChallengeIdByTitle(goal.title)
+                            ChallengeMasterCard(goal = goal, onItemClick = { challengeId?.let { onChallengeClick(it) } })
                         } else {
                             GoalCard(goal = goal, onItemClick = { onGoalClick(it.id) })
                         }

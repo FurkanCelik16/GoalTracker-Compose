@@ -33,12 +33,10 @@ fun AnalysisScreen(
     val weeklyStats by analysisViewModel.weeklyStats.collectAsStateWithLifecycle(initialValue = emptyList())
     val targetScoreState by analysisViewModel.dailyGoal.collectAsStateWithLifecycle()
     val selectedDate by analysisViewModel.selectedDate.collectAsStateWithLifecycle()
-
+    val totalScore by analysisViewModel.totalScore.collectAsStateWithLifecycle()
+    val averageScore by analysisViewModel.averageScore.collectAsStateWithLifecycle()
 
     var showGoalDialog by remember { mutableStateOf(false) }
-
-    val totalScore = weeklyStats.sumOf { it.second }
-    val averageScore = if (weeklyStats.isNotEmpty()) totalScore / weeklyStats.size else 0
 
     val totalHabitsCompleted by analysisViewModel.totalCompletedCount.collectAsStateWithLifecycle()
 

@@ -12,17 +12,19 @@ import com.example.goaltracker.R
 object NotificationHelper {
 
     private const val CHANNEL_ID = "goal_reminders"
-    private const val CHANNEL_NAME = "Hedef Hatırlatıcıları"
 
     fun showNotification(context: Context, goalId: Int, title: String, message: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        val channelName = context.getString(R.string.notification_channel_name)
+        val channelDesc = context.getString(R.string.notification_channel_description)
+
         val channel = NotificationChannel(
             CHANNEL_ID,
-            CHANNEL_NAME,
+            channelName,
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Hedef hatırlatmaları ve motivasyon bildirimleri"
+            description = channelDesc
             enableVibration(true)
         }
         notificationManager.createNotificationChannel(channel)

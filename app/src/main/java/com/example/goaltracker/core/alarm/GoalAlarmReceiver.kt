@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.goaltracker.R
 import com.example.goaltracker.core.common.util.NotificationHelper
 import com.example.goaltracker.core.data.repository.GoalRepository
 import com.example.goaltracker.core.model.ReminderType
@@ -22,17 +23,20 @@ class GoalAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val goalId = intent.getIntExtra("GOAL_ID", -1)
-        val title = intent.getStringExtra("TITLE") ?: "Hedefin Bekliyor!"
+        val defaultTitle = context.getString(R.string.notification_default_title)
+        val title = intent.getStringExtra("TITLE") ?: defaultTitle
 
         if (goalId == -1) return
 
         Log.d("GoalAlarmReceiver", "Alarm Tetiklendi! ID: $goalId")
 
+        val message = context.getString(R.string.notification_default_message)
+
         NotificationHelper.showNotification(
             context,
             goalId,
             title,
-            "Hedefine ulaşmak için harekete geçme zamanı! 🚀"
+            message
         )
         val entryPoint = EntryPointAccessors.fromApplication(
             context.applicationContext,

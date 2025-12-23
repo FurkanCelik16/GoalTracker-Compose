@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">GoalTracker</string>
+
+    <string name="notification_channel_name">Hedef Hatırlatıcıları</string>
+    <string name="notification_channel_description">Hedef hatırlatmaları ve motivasyon bildirimleri</string>
+    <string name="notification_default_title">Hedefin Bekliyor!</string>
+    <string name="notification_default_message">Hedefine ulaşmak için harekete geçme zamanı! 🚀</string>
+
+    <string name="alarm_permission_title">Alarm İzni Gerekli ⏰</string>
+    <string name="alarm_permission_message">Hatırlatıcıların tam zamanında çalabilmesi için ayarlardan \'Alarmlar ve Hatırlatıcılar\' iznini açman gerekiyor.</string>
+    <string name="open_settings">Ayarları Aç</string>
+    <string name="cancel">İptal</string>
+
+    <string name="congratulations">Tebrikler!</string>
+    <string name="goal_completed">Hedef tamamlandı.</string>
+    <string name="challenge_delete_warning">\nBu hedef, \'%1$s\' Mücadelesinin bir parçasıdır. \n\nBunu silersen tüm mücadeleyi iptal etmiş olursun!</string>
 </resources>

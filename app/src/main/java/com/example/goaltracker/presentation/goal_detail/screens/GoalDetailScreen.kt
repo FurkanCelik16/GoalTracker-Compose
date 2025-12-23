@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +29,7 @@ import com.example.goaltracker.presentation.goal_detail.dialog.PermissionRationa
 import com.example.goaltracker.presentation.goal_detail.model.GoalDetailViewModel
 import java.time.LocalDate
 import androidx.core.net.toUri
+import com.example.goaltracker.R
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +97,7 @@ fun GoalDetailScreen(
 
                         if (isPart || isFlagged) {
                             val name = currentGoal.parentChallengeTitle ?: currentGoal.title
-                            deleteWarningMessage = "\nBu hedef, '$name' Mücadelesinin bir parçasıdır. \n\nBunu silersen tüm mücadeleyi iptal etmiş olursun!"
+                            deleteWarningMessage = context.getString(R.string.challenge_delete_warning, name)
                         } else {
                             deleteWarningMessage = null
                         }
@@ -148,8 +150,8 @@ fun GoalDetailScreen(
                 } else {
                     if (isAccumulative && isCompleted) {
                         SuccessCard(
-                            message = "Tebrikler!",
-                            subMessage = "Hedef tamamlandı.",
+                            message = stringResource(id = R.string.congratulations),
+                            subMessage = stringResource(id = R.string.goal_completed),
                             onUndo = { viewModel.updateProgress(currentGoal.targetAmount - 1f) }
                         )
                     }
@@ -235,8 +237,8 @@ fun GoalDetailScreen(
     if (showExactAlarmPermissionDialog) {
         AlertDialog(
             onDismissRequest = { showExactAlarmPermissionDialog = false },
-            title = { Text("Alarm İzni Gerekli ⏰") },
-            text = { Text("Hatırlatıcıların tam zamanında çalabilmesi için ayarlardan 'Alarmlar ve Hatırlatıcılar' iznini açman gerekiyor.") },
+            title = { Text(stringResource(id = R.string.alarm_permission_title)) },
+            text = { Text(stringResource(id = R.string.alarm_permission_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showExactAlarmPermissionDialog = false
@@ -246,12 +248,12 @@ fun GoalDetailScreen(
                     )
                     context.startActivity(intent)
                 }) {
-                    Text("Ayarları Aç")
+                    Text(stringResource(id = R.string.open_settings))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExactAlarmPermissionDialog = false }) {
-                    Text("İptal")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         )

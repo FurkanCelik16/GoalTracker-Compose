@@ -47,7 +47,7 @@ fun TopBar(
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.7f),
+                    color = contentColor,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(modifier = Modifier.weight(0.07f))

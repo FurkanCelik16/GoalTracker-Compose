@@ -9,10 +9,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,9 +50,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             val systemTheme = isSystemInDarkTheme()
-            val isDarkModeConfig by mainViewModel.isDarkMode.collectAsState()
+            val isDarkModeConfig by mainViewModel.isDarkMode.collectAsStateWithLifecycle()
             val useDarkTheme = isDarkModeConfig ?: systemTheme
-            val isOnboardingCompleted by mainViewModel.isOnboardingCompleted.collectAsState()
+            val isOnboardingCompleted by mainViewModel.isOnboardingCompleted.collectAsStateWithLifecycle()
 
             GoalTrackerTheme(darkTheme = useDarkTheme) {
                 val navController = rememberNavController()

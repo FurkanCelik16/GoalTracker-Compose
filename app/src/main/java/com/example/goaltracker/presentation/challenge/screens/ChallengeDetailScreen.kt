@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.DeleteConfirmDialog
 import com.example.goaltracker.core.model.Challenge
 import com.example.goaltracker.presentation.challenge.components.ResultItem
@@ -32,7 +33,7 @@ fun ChallengeDetailScreen(
     onBack: () -> Unit,
     viewModel: ChallengeViewModel = hiltViewModel()
 ) {
-    val activeTitles by viewModel.activeChallengeTitles.collectAsState()
+    val activeTitles by viewModel.activeChallengeTitles.collectAsStateWithLifecycle()
     val isJoined = activeTitles.contains(challenge.title)
     val hasAnyActiveChallenge = activeTitles.isNotEmpty()
     var showStartDialog by remember { mutableStateOf(false) }

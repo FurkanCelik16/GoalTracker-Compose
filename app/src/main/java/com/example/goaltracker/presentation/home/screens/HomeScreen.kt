@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.goaltracker.R
 import com.example.goaltracker.core.common.ui.components.TopBar
@@ -32,11 +32,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val selectedDate by viewModel.selectedDate.collectAsState()
-    val completedIds by viewModel.completedHabitIds.collectAsState()
+    val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val completedIds by viewModel.completedHabitIds.collectAsStateWithLifecycle()
 
-    val streakToAnimate by viewModel.streakAnimationTrigger.collectAsState()
-    val showFailureAnim by viewModel.streakFailureTrigger.collectAsState()
+    val streakToAnimate by viewModel.streakAnimationTrigger.collectAsStateWithLifecycle()
+    val showFailureAnim by viewModel.streakFailureTrigger.collectAsStateWithLifecycle()
 
     val backgroundColor = MaterialTheme.colorScheme.background
     val primaryColor = MaterialTheme.colorScheme.primary

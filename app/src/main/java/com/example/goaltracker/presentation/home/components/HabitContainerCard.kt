@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.goaltracker.core.common.ui.dialog.HabitDialogController
 import com.example.goaltracker.core.common.util.isDueOn
@@ -32,9 +33,9 @@ fun HabitContainerCard(
     selectedDate: LocalDate,
     onDateChanged: (LocalDate) -> Unit
 ) {
-    val habits by viewModel.habits.collectAsState(initial = emptyList())
+    val habits by viewModel.habits.collectAsStateWithLifecycle(initialValue = emptyList())
     var selectedTab by remember { mutableStateOf(Period.DAILY) }
-    val entries by viewModel.dailyEntries.collectAsState()
+    val entries by viewModel.dailyEntries.collectAsStateWithLifecycle()
 
     val filteredHabits = remember(habits, selectedTab, selectedDate, completedHabitIds) {
         habits

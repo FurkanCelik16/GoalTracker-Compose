@@ -39,9 +39,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -66,10 +63,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
     // 3. Room Database
-    val room_version = "2.6.1"
-    implementation("androidx.room:room-runtime:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    kapt("androidx.room:room-compiler:$room_version")
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 
     // 4. ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
@@ -96,6 +93,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
 
     // Testler
     testImplementation(libs.junit)

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.TopBar
 import com.example.goaltracker.core.model.sampleChallenges
 import com.example.goaltracker.presentation.goals.components.ChallengeMasterCard
@@ -26,7 +27,7 @@ fun GoalsScreen(
     onGoalClick: (Int) -> Unit,
     onChallengeClick: (Int) -> Unit
 ) {
-    val goals by viewModel.goals.collectAsState()
+    val goals by viewModel.goals.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
 
     Scaffold(

@@ -10,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.goaltracker.core.common.ui.dialog.HabitDialogController
 import com.example.goaltracker.presentation.habit_detail.components.DetailTopBar
@@ -36,8 +36,8 @@ fun HabitDetailScreen(
     habitId: Int,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val habitState by homeViewModel.getHabitFlow(habitId).collectAsState(initial = null)
-    val historyState by homeViewModel.getHabitHistory(habitId).collectAsState(initial = emptyList())
+    val habitState by homeViewModel.getHabitFlow(habitId).collectAsStateWithLifecycle(initialValue = null)
+    val historyState by homeViewModel.getHabitHistory(habitId).collectAsStateWithLifecycle(initialValue = emptyList())
 
     val backgroundColor = if (isSystemInDarkTheme()) {
         MaterialTheme.colorScheme.background

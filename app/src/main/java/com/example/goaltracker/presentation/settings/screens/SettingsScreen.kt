@@ -26,6 +26,7 @@ import com.example.goaltracker.core.common.ui.components.TopBar
 import com.example.goaltracker.presentation.settings.components.*
 import com.example.goaltracker.presentation.settings.model.SettingsViewModel
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsScreen(
@@ -35,9 +36,9 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     val systemInDarkTheme = isSystemInDarkTheme()
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
-    val isSoundEnabled by viewModel.isSoundOn.collectAsState()
-    val userName by viewModel.userName.collectAsState()
+    val isDarkMode by viewModel.isDarkMode.collectAsStateWithLifecycle()
+    val isSoundEnabled by viewModel.isSoundOn.collectAsStateWithLifecycle()
+    val userName by viewModel.userName.collectAsStateWithLifecycle()
 
     var showResetDialog by remember { mutableStateOf(false) }
     var showNameDialog by remember { mutableStateOf(false) }
@@ -199,7 +200,7 @@ fun openWebLink(context: Context, url: String) {
     try {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         context.startActivity(intent)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         Toast.makeText(context, "Tarayıcı bulunamadı", Toast.LENGTH_SHORT).show()
     }
 }
@@ -211,7 +212,7 @@ fun sendEmail(context: Context) {
     }
     try {
         context.startActivity(intent)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         Toast.makeText(context, "E-posta uygulaması bulunamadı", Toast.LENGTH_SHORT).show()
     }
 }

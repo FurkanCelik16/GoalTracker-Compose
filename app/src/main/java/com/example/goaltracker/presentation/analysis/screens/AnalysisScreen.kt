@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.TopBar
 import com.example.goaltracker.presentation.analysis.components.AnalysisChart
 import com.example.goaltracker.presentation.analysis.components.StatCard
@@ -29,9 +30,9 @@ import com.example.goaltracker.presentation.habit_detail.dialog.GoalEditDialog
 fun AnalysisScreen(
     analysisViewModel: AnalysisViewModel = hiltViewModel(),
 ) {
-    val weeklyStats by analysisViewModel.weeklyStats.collectAsState(initial = emptyList())
-    val targetScoreState by analysisViewModel.dailyGoal.collectAsState()
-    val selectedDate by analysisViewModel.selectedDate.collectAsState()
+    val weeklyStats by analysisViewModel.weeklyStats.collectAsStateWithLifecycle(initialValue = emptyList())
+    val targetScoreState by analysisViewModel.dailyGoal.collectAsStateWithLifecycle()
+    val selectedDate by analysisViewModel.selectedDate.collectAsStateWithLifecycle()
 
 
     var showGoalDialog by remember { mutableStateOf(false) }
@@ -39,7 +40,7 @@ fun AnalysisScreen(
     val totalScore = weeklyStats.sumOf { it.second }
     val averageScore = if (weeklyStats.isNotEmpty()) totalScore / weeklyStats.size else 0
 
-    val totalHabitsCompleted by analysisViewModel.totalCompletedCount.collectAsState()
+    val totalHabitsCompleted by analysisViewModel.totalCompletedCount.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { TopBar("İstatistiklerim", "Gelişimini Takip Et.") }

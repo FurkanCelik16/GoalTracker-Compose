@@ -29,6 +29,7 @@ import com.example.goaltracker.presentation.goal_detail.dialog.PermissionRationa
 import com.example.goaltracker.presentation.goal_detail.model.GoalDetailViewModel
 import java.time.LocalDate
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.R
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -38,11 +39,11 @@ fun GoalDetailScreen(
     onBackClick: () -> Unit,
     viewModel: GoalDetailViewModel = hiltViewModel()
 ) {
-    val goal by viewModel.goal.collectAsState()
-    val chartData by viewModel.chartData.collectAsState()
-    val timeRange by viewModel.chartTimeRange.collectAsState()
-    val chartDate by viewModel.chartSelectedDate.collectAsState()
-    val history by viewModel.history.collectAsState()
+    val goal by viewModel.goal.collectAsStateWithLifecycle()
+    val chartData by viewModel.chartData.collectAsStateWithLifecycle()
+    val timeRange by viewModel.chartTimeRange.collectAsStateWithLifecycle()
+    val chartDate by viewModel.chartSelectedDate.collectAsStateWithLifecycle()
+    val history by viewModel.history.collectAsStateWithLifecycle()
 
     var inputAmount by remember { mutableStateOf("") }
     var selectedEntryDate by remember { mutableStateOf(LocalDate.now()) }

@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.goaltracker.core.common.ui.components.TopBar
-import com.example.goaltracker.core.model.Challenge
 import com.example.goaltracker.presentation.challenge.model.ChallengeViewModel
 import com.example.goaltracker.presentation.challenge.components.ChallengeCard
 
@@ -22,11 +21,7 @@ fun ChallengeScreen(
 ) {
     val challenges by viewModel.challenges.collectAsStateWithLifecycle()
 
-    var selectedChallenge by remember { mutableStateOf<Challenge?>(null) }
-
-    if (selectedChallenge == null) {
-
-        Scaffold(
+    Scaffold(
             topBar = {
                 TopBar(title = "Mücadele", text = "Sınırlarını Zorla.")
             }
@@ -48,4 +43,3 @@ fun ChallengeScreen(
             }
         }
     }
-}

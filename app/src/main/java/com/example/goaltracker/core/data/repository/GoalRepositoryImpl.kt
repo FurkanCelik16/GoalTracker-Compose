@@ -47,39 +47,11 @@ class GoalRepositoryImpl @Inject constructor(
         goalDao.deleteAllGoals()
     }
 
-    override suspend fun addHistoryEntry(goalId: Int, amountToAdd: Float, date: LocalDate) {
-        val zoneId = ZoneId.systemDefault()
-        val startOfDay = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
-
-        val existingEntry = goalDao.getGoalHistoryByDate(goalId, startOfDay, endOfDay)
-
-        val historyEntity = existingEntry?.copy(
-            value = existingEntry.value + amountToAdd,
-            date = startOfDay
-        ) ?: GoalHistoryEntity(
-            goalId = goalId,
-            value = amountToAdd,
-            date = startOfDay
-        )
-        goalDao.insertGoalHistory(historyEntity)
+    override suspend fun getGoalHistoryByDate(goalId: Int, start: Long, end: Long): GoalHistoryEntity? {
+        return goalDao.getGoalHistoryByDate(goalId, start, end)
     }
 
-    override suspend fun setHistoryEntry(goalId: Int, finalAmount: Float, date: LocalDate) {
-        val zoneId = ZoneId.systemDefault()
-        val startOfDay = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli() - 1
-
-        val existingEntry = goalDao.getGoalHistoryByDate(goalId, startOfDay, endOfDay)
-
-        val historyEntity = existingEntry?.copy(
-            value = finalAmount,
-            date = startOfDay
-        ) ?: GoalHistoryEntity(
-            goalId = goalId,
-            value = finalAmount,
-            date = startOfDay
-        )
+    override suspend fun insertGoalHistory(historyEntity: GoalHistoryEntity) {
         goalDao.insertGoalHistory(historyEntity)
     }
 

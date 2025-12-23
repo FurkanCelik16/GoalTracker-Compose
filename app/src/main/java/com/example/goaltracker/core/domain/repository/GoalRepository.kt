@@ -16,8 +16,10 @@ interface GoalRepository {
     suspend fun getGoalByTitle(title: String): Goal?
     suspend fun deleteGoalByTitle(title: String)
     suspend fun deleteAllGoals()
-    suspend fun addHistoryEntry(goalId: Int, amountToAdd: Float, date: LocalDate)
-    suspend fun setHistoryEntry(goalId: Int, finalAmount: Float, date: LocalDate)
+
+    suspend fun getGoalHistoryByDate(goalId: Int, start: Long, end: Long): GoalHistoryEntity?
+
+    suspend fun insertGoalHistory(historyEntity: GoalHistoryEntity)
     suspend fun deleteGoalsByChallengeTitle(title: String)
     suspend fun getGoalsByParentTitle(title: String): List<Goal>
 }

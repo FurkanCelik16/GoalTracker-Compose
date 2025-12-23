@@ -11,16 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.goaltracker.core.common.ui.dialog.HabitDialogController
 import com.example.goaltracker.core.common.util.isDueOn
-import com.example.goaltracker.core.model.Habit
-import com.example.goaltracker.core.model.HabitType
-import com.example.goaltracker.core.model.Period
+import com.example.goaltracker.core.model.*
 import com.example.goaltracker.presentation.navigation.GoalTrackerDestinations
-import com.example.goaltracker.presentation.home.model.HomeViewModel
 import com.example.goaltracker.presentation.home.dialog.RenderHabitDialogs
 import java.time.LocalDate
 
@@ -28,14 +23,17 @@ import java.time.LocalDate
 @Composable
 fun HabitContainerCard(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel(),
+    habits: List<Habit>,
+    entries: Map<Int, HabitEntry>,
     completedHabitIds: List<Int>,
     selectedDate: LocalDate,
-    onDateChanged: (LocalDate) -> Unit
+    onDateChanged: (LocalDate) -> Unit,
+    onToggleHabit: (Habit) -> Unit,
+    onAddHabit: (String, String, Period, HabitDifficulty, HabitType, TimeOfDay, List<Int>, Int, Int) -> Unit,
+    onUpdateHabit: (Habit) -> Unit,
+    onDeleteHabit: (Habit) -> Unit
 ) {
-    val habits by viewModel.habits.collectAsStateWithLifecycle(initialValue = emptyList())
     var selectedTab by remember { mutableStateOf(Period.DAILY) }
-    val entries by viewModel.dailyEntries.collectAsStateWithLifecycle()
 
     val filteredHabits = remember(habits, selectedTab, selectedDate, completedHabitIds) {
         habits
@@ -44,7 +42,6 @@ fun HabitContainerCard(
             .sortedWith(
                 compareBy<Habit> { habit ->
                     val isMarked = completedHabitIds.contains(habit.id)
-
                     when {
                         habit.type == HabitType.POSITIVE && isMarked -> 2
                         habit.type == HabitType.NEGATIVE && isMarked -> 1
@@ -103,23 +100,16 @@ fun HabitContainerCard(
                         EmptyStateView(modifier = Modifier.padding(top = 32.dp))
                     }
                 } else {
-                    items(
-                        items = filteredHabits,
-                        key = { it.id }
-                    ) { habit ->
+                    items(items = filteredHabits, key = { it.id }) { habit ->
                         val isCompleted = completedHabitIds.contains(habit.id)
 
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .animateItem()
-                        ) {
+                        Box(modifier = Modifier.padding(horizontal = 16.dp).animateItem()) {
                             HabitCard(
                                 habit = habit,
                                 isCompleted = isCompleted,
                                 currentAmount = entries[habit.id]?.amount ?: 0f,
                                 selectedDate = selectedDate,
-                                onToggleComplete = { viewModel.toggleHabit(habit) },
+                                onToggleComplete = { onToggleHabit(habit) },
                                 onClick = {
                                     navController.navigate(GoalTrackerDestinations.HabitDetail.createRoute(habit.id))
                                 }
@@ -130,12 +120,11 @@ fun HabitContainerCard(
             }
         }
     }
+
     RenderHabitDialogs(
         controller = dialogController,
-        onAddHabit = { name, category, period, difficulty, type, timeOfDay, days, interval,target ->
-            viewModel.addHabit(name, category, period, difficulty, type, timeOfDay, days, interval,target)
-        },
-        onEditHabit = { viewModel.updateHabit(it) },
-        onDeleteHabit = { viewModel.deleteHabit(it) }
+        onAddHabit = onAddHabit,
+        onEditHabit = onUpdateHabit,
+        onDeleteHabit = onDeleteHabit
     )
 }

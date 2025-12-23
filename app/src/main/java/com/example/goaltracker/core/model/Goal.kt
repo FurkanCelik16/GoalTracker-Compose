@@ -26,5 +26,4 @@ data class Goal(
     val isChallengeMaster: Boolean = false,
     val parentChallengeTitle: String? = null,
     val startDate: LocalDate = LocalDate.now()
-
 )

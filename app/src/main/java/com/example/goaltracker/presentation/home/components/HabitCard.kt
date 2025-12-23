@@ -80,7 +80,6 @@ fun HabitCard(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Kategori İkonları
                 val iconRes = when (habit.category) {
                     "Kişisel Gelişim" -> R.drawable.personaldevelopment
                     "Sağlık" -> R.drawable.health
@@ -131,9 +130,8 @@ fun HabitCard(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Zorluk Rozeti
                         val (badgeColor, badgeText) = when (habit.difficulty) {
-                            HabitDifficulty.EASY -> SuccessColor to "Kolay"
+                            HabitDifficulty.EASY -> GoldColor to "Kolay"
                             HabitDifficulty.MEDIUM -> WarningColor to "Orta"
                             HabitDifficulty.HARD -> ErrorColor to "Zor"
                         }

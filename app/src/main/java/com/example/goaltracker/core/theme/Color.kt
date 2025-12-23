@@ -54,6 +54,8 @@ val DarkSecondary = GreenSuccess
 
 // Özel Renkler (Tema bağımsız veya özel durumlar için)
 val SuccessColor = GreenSuccess
+
+val GoldColor = GoldAccent
 val ErrorColor = RedError
 val WarningColor = OrangeWarning
 val PremiumColor = GoldAccent

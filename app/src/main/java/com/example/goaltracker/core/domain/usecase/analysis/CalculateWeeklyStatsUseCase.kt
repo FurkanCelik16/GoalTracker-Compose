@@ -36,6 +36,9 @@ class CalculateWeeklyStatsUseCase @Inject constructor(
                     .map { it.habitId }
 
                 val dailyScore = habits.sumOf{ habit ->
+                    if (dateToCheck.isBefore(habit.startDate)) {
+                        return@sumOf 0
+                    }
                    val isMarked = habit.id in completedIdsAtDate
 
                     val points:Int = when (habit.difficulty) {

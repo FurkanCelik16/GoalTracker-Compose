@@ -3,6 +3,7 @@ package com.example.goaltracker.presentation.habit_detail.model
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.goaltracker.core.domain.usecase.challenge.DeleteChallengeUseCase
 import com.example.goaltracker.core.domain.usecase.habit.DeleteHabitUseCase
 import com.example.goaltracker.core.domain.usecase.habit.GetHabitHistoryUseCase
 import com.example.goaltracker.core.domain.usecase.habit.GetHabitsUseCase
@@ -21,6 +22,7 @@ class HabitDetailViewModel @Inject constructor(
     getHabitHistoryUseCase: GetHabitHistoryUseCase,
     private val updateHabitUseCase: UpdateHabitUseCase,
     private val deleteHabitUseCase: DeleteHabitUseCase,
+    private val deleteChallengeUseCase: DeleteChallengeUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -41,7 +43,11 @@ class HabitDetailViewModel @Inject constructor(
 
     fun deleteHabit(habit: Habit, onComplete: () -> Unit) {
         viewModelScope.launch {
-            deleteHabitUseCase(habit)
+            if (habit.isChallenge) {
+                deleteChallengeUseCase(habit.category)
+            } else {
+                deleteHabitUseCase(habit)
+            }
             onComplete()
         }
     }

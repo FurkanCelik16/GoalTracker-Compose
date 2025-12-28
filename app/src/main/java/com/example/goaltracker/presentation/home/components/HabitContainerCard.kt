@@ -34,20 +34,19 @@ fun HabitContainerCard(
     onDeleteHabit: (Habit) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(Period.DAILY) }
-
     val filteredHabits = remember(habits, selectedTab, selectedDate, completedHabitIds) {
         habits
             .filter { it.period == selectedTab }
             .filter { it.isDueOn(selectedDate) }
             .sortedWith(
                 compareBy<Habit> { habit ->
-                    val isMarked = completedHabitIds.contains(habit.id)
-                    when {
-                        habit.type == HabitType.POSITIVE && isMarked -> 2
-                        habit.type == HabitType.NEGATIVE && isMarked -> 1
-                        else -> 0
-                    }
-                }.thenBy { it.timeOfDay.ordinal }
+                 val isCompleted = completedHabitIds.contains(habit.id)
+                 when{
+                     !isCompleted && habit.type == HabitType.POSITIVE -> 0
+                     !isCompleted && habit.type == HabitType.NEGATIVE -> 1
+                     else ->2
+                 }}.thenBy { it.timeOfDay.ordinal }
+                    .thenBy { it.id }
             )
     }
 

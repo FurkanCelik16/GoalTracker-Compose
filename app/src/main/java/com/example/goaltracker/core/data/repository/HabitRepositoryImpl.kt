@@ -53,5 +53,7 @@ class HabitRepositoryImpl @Inject constructor(
     override suspend fun getEntryForDate(habitId: Int, date: LocalDate): HabitEntry? = entryDao.getEntryForDate(habitId, date)
 
     override fun getHistory(habitId: Int): Flow<List<HabitEntry>> = entryDao.getHistory(habitId)
+
+    override fun getAllEntries(): Flow<List<HabitEntry>> = entryDao.getAllEntries()
 }
 

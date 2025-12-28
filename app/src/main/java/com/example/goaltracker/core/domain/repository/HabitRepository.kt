@@ -24,4 +24,6 @@ interface HabitRepository {
     fun getEntriesByDate(date: LocalDate): Flow<List<HabitEntry>>
     suspend fun getEntryForDate(habitId: Int, date: LocalDate): HabitEntry?
     fun getHistory(habitId: Int): Flow<List<HabitEntry>>
+
+    fun getAllEntries():Flow<List<HabitEntry>>
 }

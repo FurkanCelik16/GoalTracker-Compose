@@ -34,8 +34,8 @@ val sampleChallenges = listOf(
         color = ChallengePurple,
         goalsToAdd = listOf(
             GoalBlueprint("Sosyal Medya Yok", 1f, GoalType.BINARY, 5),
-            GoalBlueprint("Şeker Yok", 1f, GoalType.BINARY, 2),
-            GoalBlueprint("Soğuk Duş", 1f, GoalType.BINARY, 8)
+            GoalBlueprint("Şeker Yok", 1f, GoalType.BINARY, 6),
+            GoalBlueprint("Soğuk Duş", 1f, GoalType.BINARY, 7)
         ),
         keyResults = listOf(
             Icons.Default.SelfImprovement to "Zihinsel Berraklık",
@@ -56,9 +56,9 @@ val sampleChallenges = listOf(
         days = 21,
         color = ChallengeOrange,
         goalsToAdd = listOf(
-            GoalBlueprint("50 Şınav", 50f, GoalType.RECURRING, 0),
-            GoalBlueprint("Erken Kalk (06:00)", 1f, GoalType.BINARY, 1),
-            GoalBlueprint("3 Litre Su", 3f, GoalType.RECURRING, 3)
+            GoalBlueprint("50 Şınav", 50f, GoalType.RECURRING, 3),
+            GoalBlueprint("Erken Kalk (07:00)", 1f, GoalType.BINARY, 8),
+            GoalBlueprint("2.5 Litre Su", 2.5f, GoalType.RECURRING, 9)
         ),
         keyResults = listOf(
             Icons.Default.FitnessCenter to "Fiziksel Güç",
@@ -79,9 +79,9 @@ val sampleChallenges = listOf(
         days = 14,
         color = ChallengeGreen,
         goalsToAdd = listOf(
-            GoalBlueprint("15 Dk Meditasyon", 15f, GoalType.RECURRING, 4),
-            GoalBlueprint("Günlük Tut", 1f, GoalType.BINARY, 6),
-            GoalBlueprint("Doğa Yürüyüşü", 1f, GoalType.BINARY, 7)
+            GoalBlueprint("15 Dk Meditasyon", 15f, GoalType.RECURRING, 10),
+            GoalBlueprint("Günlük Tut", 1f, GoalType.BINARY, 11),
+            GoalBlueprint("Doğa Yürüyüşü", 1f, GoalType.BINARY, 12)
         ),
         keyResults = listOf(
             Icons.Default.Spa to "İç Huzur",

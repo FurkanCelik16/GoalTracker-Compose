@@ -34,18 +34,44 @@ fun HabitContainerCard(
     onDeleteHabit: (Habit) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(Period.DAILY) }
-    val filteredHabits = remember(habits, selectedTab, selectedDate, completedHabitIds) {
+    var selectedTimeOfDay by remember {
+        mutableStateOf(getInitialTimeOfDay())
+    }
+    val handleDateChange = { newDate: LocalDate ->
+        onDateChanged(newDate)
+
+
+        selectedTimeOfDay = if (newDate.isBefore(LocalDate.now())) {
+            TimeOfDay.ANYTIME
+        } else {
+            getInitialTimeOfDay()
+        }
+    }
+    val filteredHabits = remember(habits, selectedTab, selectedDate, completedHabitIds, selectedTimeOfDay) {
         habits
             .filter { it.period == selectedTab }
             .filter { it.isDueOn(selectedDate) }
+            .filter {
+                if (selectedTimeOfDay == TimeOfDay.ANYTIME) return@filter true
+                it.timeOfDay == selectedTimeOfDay || it.timeOfDay == TimeOfDay.ANYTIME
+            }
             .sortedWith(
                 compareBy<Habit> { habit ->
-                 val isCompleted = completedHabitIds.contains(habit.id)
-                 when{
-                     !isCompleted && habit.type == HabitType.POSITIVE -> 0
-                     !isCompleted && habit.type == HabitType.NEGATIVE -> 1
-                     else ->2
-                 }}.thenBy { it.timeOfDay.ordinal }
+                    val isCompleted = completedHabitIds.contains(habit.id)
+                    when {
+                        !isCompleted && habit.type == HabitType.POSITIVE -> 0
+                        !isCompleted && habit.type == HabitType.NEGATIVE -> 1
+                        else -> 2
+                    }
+                }.thenBy { habit ->
+                    if(selectedTimeOfDay == TimeOfDay.ANYTIME){
+                        if (habit.timeOfDay == TimeOfDay.ANYTIME) 0 else 1
+                    }
+                    else{
+                        if (habit.timeOfDay == selectedTimeOfDay) 0 else 1
+                    }
+                }
+                    .thenBy { it.timeOfDay.ordinal }
                     .thenBy { it.id }
             )
     }
@@ -73,7 +99,9 @@ fun HabitContainerCard(
                 item {
                     HorizontalCalendar(
                         selectedDate = selectedDate,
-                        onDateSelected = onDateChanged,
+                        onDateSelected = handleDateChange,
+                        selectedTimeOfDay = selectedTimeOfDay,
+                        onTimeOfDaySelected = { selectedTimeOfDay = it },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -126,4 +154,13 @@ fun HabitContainerCard(
         onEditHabit = onUpdateHabit,
         onDeleteHabit = onDeleteHabit
     )
+}
+private fun getInitialTimeOfDay(): TimeOfDay {
+    val hour = java.time.LocalTime.now().hour
+    return when (hour) {
+        in 5..11 -> TimeOfDay.MORNING
+        in 12..16 -> TimeOfDay.AFTERNOON
+        in 17..23, in 0..4 -> TimeOfDay.EVENING
+        else -> TimeOfDay.ANYTIME
+    }
 }

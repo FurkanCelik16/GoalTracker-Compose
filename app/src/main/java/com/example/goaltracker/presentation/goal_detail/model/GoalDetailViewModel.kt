@@ -14,6 +14,7 @@ import com.example.goaltracker.core.domain.usecase.goal.DeleteGoalUseCase
 import com.example.goaltracker.core.domain.usecase.goal.GetGoalChartDataUseCase
 import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalProgressUseCase
 import com.example.goaltracker.core.model.Goal
+import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.ReminderType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -109,7 +110,8 @@ class GoalDetailViewModel @Inject constructor(
     }
     fun addProgress(goal: Goal, amount: Float, date: LocalDate = LocalDate.now()) {
         viewModelScope.launch {
-            updateGoalProgressUseCase(goal, amount, date)
+            val isRecurring = goal.type == GoalType.RECURRING
+            updateGoalProgressUseCase(goal, amount, date, shouldOverwrite = isRecurring)
             val parentTitle = goal.parentChallengeTitle
             if (parentTitle != null) {
                 checkChallengeProgressUseCase(parentTitle, date)

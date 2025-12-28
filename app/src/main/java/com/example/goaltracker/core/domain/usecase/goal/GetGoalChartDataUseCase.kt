@@ -60,8 +60,8 @@ class GetGoalChartDataUseCase @Inject constructor() {
                 dailyIncrement
             }
 
-            val finalValue = if (isFuture && dailyIncrement == 0f) {
-                if (isAccumulative) runningTotal else 0f
+            val finalValue = if (isFuture ) {
+                0f
             } else {
                 chartValue
             }

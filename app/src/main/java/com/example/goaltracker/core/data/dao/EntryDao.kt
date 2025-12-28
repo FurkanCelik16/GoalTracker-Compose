@@ -40,5 +40,8 @@ interface EntryDao {
     @Query("SELECT * FROM habit_entries WHERE date = :date")
     fun getEntriesByDate(date: LocalDate): Flow<List<HabitEntry>>
 
+    @Query("SELECT * FROM habit_entries")
+    fun getAllEntries(): Flow<List<HabitEntry>>
+
 
 }

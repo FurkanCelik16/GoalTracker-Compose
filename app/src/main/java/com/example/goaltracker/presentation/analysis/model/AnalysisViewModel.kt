@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.goaltracker.core.domain.repository.HabitRepository
 import com.example.goaltracker.core.domain.usecase.analysis.CalculateWeeklyStatsUseCase
+import com.example.goaltracker.core.domain.usecase.analysis.GetTotalCompletedCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -14,8 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AnalysisViewModel @Inject constructor(
-    habitRepository: HabitRepository,
     calculateWeeklyStatsUseCase: CalculateWeeklyStatsUseCase,
+    getTotalCompletedCountUseCase: GetTotalCompletedCountUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -27,7 +27,7 @@ class AnalysisViewModel @Inject constructor(
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate = _selectedDate.asStateFlow()
 
-    val totalCompletedCount = habitRepository.getTotalEntryCount()
+    val totalCompletedCount = getTotalCompletedCountUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),

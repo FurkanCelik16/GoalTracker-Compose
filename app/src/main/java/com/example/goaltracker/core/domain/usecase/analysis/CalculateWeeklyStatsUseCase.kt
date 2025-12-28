@@ -35,15 +35,22 @@ class CalculateWeeklyStatsUseCase @Inject constructor(
                     .filter { it.date == dateToCheck }
                     .map { it.habitId }
 
-                val dailyScore = habits.filter { habit ->
-                    habit.id in completedIdsAtDate && habit.type == HabitType.POSITIVE
-                }.sumOf { habit ->
+                val dailyScore = habits.sumOf{ habit ->
+                   val isMarked = habit.id in completedIdsAtDate
+
                     val points:Int = when (habit.difficulty) {
                         HabitDifficulty.HARD -> 20
                         HabitDifficulty.MEDIUM -> 10
                         HabitDifficulty.EASY -> 5
                     }
-                    points
+                    when(habit.type){
+                        HabitType.POSITIVE -> {
+                            if(isMarked) points else 0
+                        }
+                        HabitType.NEGATIVE -> {
+                            if(!isMarked) points else 0
+                        }
+                    }
                 }
 
                 val dayName = dateToCheck.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("tr"))

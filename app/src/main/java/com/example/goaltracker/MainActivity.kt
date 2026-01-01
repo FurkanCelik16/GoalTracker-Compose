@@ -10,7 +10,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -20,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.goaltracker.core.common.ui.components.BottomMenu
+import com.example.goaltracker.core.common.util.SplashManager
 import com.example.goaltracker.core.theme.GoalTrackerTheme
 import com.example.goaltracker.presentation.analysis.screens.AnalysisScreen
 import com.example.goaltracker.presentation.challenge.screens.ChallengeDetailScreen
@@ -52,6 +55,13 @@ class MainActivity : ComponentActivity() {
             val isDarkModeConfig by mainViewModel.isDarkMode.collectAsStateWithLifecycle()
             val useDarkTheme = isDarkModeConfig ?: systemTheme
             val isOnboardingCompleted by mainViewModel.isOnboardingCompleted.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+            val splashManager = remember { SplashManager(context) }
+            val startDest = if (splashManager.shouldShowSplash()) {
+                GoalTrackerDestinations.Splash.route
+            } else {
+                GoalTrackerDestinations.Home.route
+            }
 
             GoalTrackerTheme(darkTheme = useDarkTheme) {
                 val navController = rememberNavController()
@@ -73,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = GoalTrackerDestinations.Splash.route,
+                        startDestination = startDest,
                         modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
                     ) {
 
@@ -110,7 +120,7 @@ class MainActivity : ComponentActivity() {
                         composable(
                             route = GoalTrackerDestinations.HabitDetail.route,
                             arguments = listOf(navArgument("habitId") { type = NavType.IntType })
-                        ) { backStackEntry ->
+                        ) { _ ->
                             HabitDetailScreen(navController)
                         }
 
@@ -153,7 +163,7 @@ class MainActivity : ComponentActivity() {
                         composable(
                             route = GoalTrackerDestinations.ChallengeDetail.route,
                             arguments = listOf(navArgument("challengeId") { type = NavType.IntType })
-                        ) { backStackEntry ->
+                        ) { _ ->
                             ChallengeDetailScreen(
                                 onBack = { navController.popBackStack() },
                             )

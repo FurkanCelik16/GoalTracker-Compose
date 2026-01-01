@@ -59,8 +59,6 @@ fun GoalCard(
         Icons.Default.Star to primaryColor
     }
 
-    val cardContainerColor = surfaceColor
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,7 +66,7 @@ fun GoalCard(
             .padding(vertical = 8.dp)
             .clickable { onItemClick(goal) },
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = cardContainerColor),
+        colors = CardDefaults.cardColors(containerColor = surfaceColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -111,7 +109,7 @@ fun GoalCard(
                 style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
                 fontWeight = FontWeight.Bold,
                 color = onSurfaceColor,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 

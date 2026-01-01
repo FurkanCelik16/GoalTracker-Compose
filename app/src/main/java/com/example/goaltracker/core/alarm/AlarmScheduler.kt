@@ -21,7 +21,6 @@ object AlarmScheduler {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                Log.e("AlarmScheduler", "İzin yok! Alarm kurulamadı. Kullanıcıyı ayarlara yönlendirmek gerek.")
                 return
             }
         }
@@ -50,13 +49,11 @@ object AlarmScheduler {
                     triggerMillis,
                     pendingIntent
                 )
-                Log.i("AlarmScheduler", "ALARM KURULDU: ${goal.title} -> $nextTriggerTime")
             } catch (e: SecurityException) {
                 Log.e("AlarmScheduler", "İzin hatası: ${e.message}")
             }
         } else {
             alarmManager.cancel(pendingIntent)
-            Log.w("AlarmScheduler", "Uygun zaman bulunamadı, alarm iptal edildi: ${goal.title}")
         }
     }
     fun cancelAlarm(context: Context, goalId: Int) {
@@ -69,7 +66,6 @@ object AlarmScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
-        Log.i("AlarmScheduler", "Alarm silindi: ID $goalId")
     }
     private fun calculateNextTriggerTime(goal: Goal): LocalDateTime? {
         if (goal.reminderStartTime.isNullOrBlank()) return null

@@ -1,6 +1,7 @@
 package com.example.goaltracker.presentation.home.dialog
 
 import android.view.KeyEvent
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,7 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goaltracker.core.common.ui.components.ModernDropdown
 import com.example.goaltracker.core.common.ui.components.Input
+import com.example.goaltracker.core.common.util.SmartSheetBackHandler
+import com.example.goaltracker.core.common.util.disableVerticalSwipe
 import com.example.goaltracker.core.model.HabitDifficulty
 import com.example.goaltracker.core.model.HabitType
 import com.example.goaltracker.core.model.Period
@@ -76,28 +82,44 @@ fun AddHabitSheet(
     val scope = rememberCoroutineScope()
 
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val isKeyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+
+    SmartSheetBackHandler(keyboardController, focusManager)
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
+        dragHandle = null,
         properties = ModalBottomSheetProperties(
             shouldDismissOnBackPress = false
         )
     ) {
+        BackHandler(enabled = true) {
+            if (isKeyboardOpen) {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            } else {
+                onDismiss()
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(x = shakeOffset.value.dp)
+                .offset(x = shakeOffset.value.dp).disableVerticalSwipe()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
+                .padding(top = 24.dp,bottom = 24.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
                     focusManager.clearFocus()
+                    keyboardController?.hide()
                 }
                 .padding(bottom = 40.dp)
         ) {
@@ -262,8 +284,11 @@ fun AddHabitSheet(
                         singleLine = true,
                         maxLines = 1,
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
+                            keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() }
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

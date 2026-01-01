@@ -1,5 +1,6 @@
 package com.example.goaltracker.presentation.goals.dialog
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
@@ -21,11 +22,14 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.goaltracker.core.common.ui.components.Input
+import com.example.goaltracker.core.common.util.SmartSheetBackHandler
+import com.example.goaltracker.core.common.util.disableVerticalSwipe
 import com.example.goaltracker.core.model.Goal
 import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.presentation.goals.components.goalIcons
@@ -62,15 +68,19 @@ fun AddGoalSheet(
     var isDecimalAllowed by remember {
         mutableStateOf(initialGoal?.targetAmount?.let { it % 1 != 0f } ?: false)
     }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val isKeyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
+    SmartSheetBackHandler(keyboardController, focusManager)
     var showError by remember { mutableStateOf(false) }
     val shakeOffset = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
 
     var showDatePicker by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val onDismissRequest = { showDatePicker = false }
+
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -85,18 +95,28 @@ fun AddGoalSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = surfaceColor,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
+        dragHandle = null,
         properties = ModalBottomSheetProperties(
             shouldDismissOnBackPress = false
         )
     ) {
+        BackHandler(enabled = true) {
+            if (isKeyboardOpen) {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            } else {
+                onDismiss()
+            }
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset(x = shakeOffset.value.dp)
+                .disableVerticalSwipe()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 40.dp)
+                .padding(top = 24.dp,bottom = 40.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -107,11 +127,11 @@ fun AddGoalSheet(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = if (isEditMode) "Hedefi Düzenle" else "Yeni Hedef",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = onSurfaceColor
-            )
+                Text(
+                    text = if (isEditMode) "Hedefi Düzenle" else "Yeni Hedef",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = onSurfaceColor
+                )
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -243,27 +263,37 @@ fun AddGoalSheet(
                     style = MaterialTheme.typography.labelSmall,
                     color = onSurfaceVariantColor
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 ) {
-                    items(goalIcons.size) { index ->
-                        val (icon, color) = goalIcons[index]
-                        val isSelected = selectedIconIndex == index
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(if (isSelected) color else MaterialTheme.colorScheme.surfaceVariant)
-                                .clickable { selectedIconIndex = index },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = if (isSelected) Color.White else onSurfaceVariantColor
-                            )
+                    LazyRow(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        items(goalIcons.size) { index ->
+                            val (icon, color) = goalIcons[index]
+                            val isSelected = selectedIconIndex == index
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isSelected) color else MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable { selectedIconIndex = index },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = if (isSelected) Color.White else onSurfaceVariantColor
+                                )
+                            }
                         }
                     }
                 }
@@ -339,20 +369,20 @@ fun AddGoalSheet(
 
     if (showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest =  onDismissRequest ,
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         selectedDate =
                             Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
                     }
-                    showDatePicker = false
+                    onDismissRequest()
                 }) {
                     Text("SEÇ", fontWeight = FontWeight.Bold, color = primaryColor)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = onDismissRequest) {
                     Text("İPTAL")
                 }
             }

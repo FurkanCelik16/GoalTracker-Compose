@@ -35,6 +35,7 @@ fun HabitDetailScreen(
     navController: NavController,
     viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
+    val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
     val habitState by viewModel.habit.collectAsStateWithLifecycle()
     val historyState by viewModel.history.collectAsStateWithLifecycle()
 
@@ -46,6 +47,7 @@ fun HabitDetailScreen(
 
     val dialogController = remember { HabitDialogController() }
     var deleteWarningMessage by remember { mutableStateOf<String?>(null) }
+
 
     if (habitState == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -87,9 +89,11 @@ fun HabitDetailScreen(
             StreakCard(streak = habit.streak, period = habit.period)
 
             Spacer(modifier = Modifier.height(16.dp))
+
             HeatMapCard(
                 habit = habit,
-                completedDates = completedDates
+                completedDates = completedDates,
+                currentDate = selectedDate
             )
 
             Spacer(modifier = Modifier.height(16.dp))

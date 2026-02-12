@@ -7,12 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.goaltracker.core.alarm.AlarmScheduler
 import com.example.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
 import com.example.goaltracker.core.domain.usecase.challenge.DeleteChallengeUseCase
-import com.example.goaltracker.core.domain.usecase.goal.GetGoalDetailUseCase
-import com.example.goaltracker.core.domain.usecase.goal.GetGoalHistoryUseCase
-import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalUseCase
 import com.example.goaltracker.core.domain.usecase.goal.DeleteGoalUseCase
 import com.example.goaltracker.core.domain.usecase.goal.GetGoalChartDataUseCase
+import com.example.goaltracker.core.domain.usecase.goal.GetGoalDetailUseCase
+import com.example.goaltracker.core.domain.usecase.goal.GetGoalHistoryUseCase
 import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalProgressUseCase
+import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalUseCase
 import com.example.goaltracker.core.model.Goal
 import com.example.goaltracker.core.model.GoalType
 import com.example.goaltracker.core.model.ReminderType
@@ -38,7 +38,6 @@ class GoalDetailViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
 
     private val goalId: Int = checkNotNull(savedStateHandle["goalId"])
 
@@ -66,18 +65,23 @@ class GoalDetailViewModel @Inject constructor(
     fun updateChartRange(range: ChartTimeRange) { _chartTimeRange.value = range }
     fun updateChartDate(date: LocalDate) { _chartSelectedDate.value = date }
 
-
-
     fun updateProgress(newCurrentAmount: Float) {
         val currentGoal = goal.value ?: return
         viewModelScope.launch {
-            updateGoalUseCase(currentGoal.copy(currentAmount = newCurrentAmount))
+            updateGoalProgressUseCase(
+                goal = currentGoal,
+                amount = newCurrentAmount,
+                date = LocalDate.now(),
+                shouldOverwrite = true
+            )
+
             val parentTitle = currentGoal.parentChallengeTitle
             if (parentTitle != null) {
                 checkChallengeProgressUseCase(parentTitle, LocalDate.now())
             }
         }
     }
+
     fun updateGoal(updatedGoal: Goal) {
         viewModelScope.launch {
             updateGoalUseCase(updatedGoal)
@@ -93,6 +97,7 @@ class GoalDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             AlarmScheduler.cancelAlarm(context, currentGoal.id)
+
             val challengeTitleToDelete = when {
                 currentGoal.isChallengeMaster -> currentGoal.title
                 currentGoal.parentChallengeTitle != null -> currentGoal.parentChallengeTitle
@@ -108,16 +113,19 @@ class GoalDetailViewModel @Inject constructor(
             onDeleteComplete()
         }
     }
+
     fun addProgress(goal: Goal, amount: Float, date: LocalDate = LocalDate.now()) {
         viewModelScope.launch {
             val isRecurring = goal.type == GoalType.RECURRING
             updateGoalProgressUseCase(goal, amount, date, shouldOverwrite = isRecurring)
+
             val parentTitle = goal.parentChallengeTitle
             if (parentTitle != null) {
                 checkChallengeProgressUseCase(parentTitle, date)
             }
         }
     }
+
     fun setReminder(goal: Goal, type: ReminderType, start: String, end: String?, interval: Int) {
         viewModelScope.launch {
             val updatedGoal = goal.copy(
@@ -135,15 +143,12 @@ class GoalDetailViewModel @Inject constructor(
             }
         }
     }
-    fun getProgressForDate(date: LocalDate): Float {
 
+    fun getProgressForDate(date: LocalDate): Float {
         val historyItem = history.value.find {
             val hDate = Instant.ofEpochMilli(it.date).atZone(ZoneId.systemDefault()).toLocalDate()
             hDate == date
         }
-
         return historyItem?.value ?: 0f
     }
-
-
 }

@@ -86,11 +86,25 @@ class HomeViewModel @Inject constructor(
 
                 if (habit.type == HabitType.POSITIVE && !wasCompleted && isNowCompleted) {
                     val updatedHabit = getHabitByIdUseCase(habit.id)
-                    _streakAnimationTrigger.value = updatedHabit?.streak
+                    val currentStreak = updatedHabit?.streak ?: 0
+                    if(shouldStreakShowAnimation(currentStreak)){
+                        _streakAnimationTrigger.value = currentStreak
+                    }
                 } else if (habit.type == HabitType.NEGATIVE && isNowCompleted) {
                     _streakFailureTrigger.value = true
                 }
             }
+        }
+    }
+    private fun shouldStreakShowAnimation(streak:Int):Boolean{
+        val milestones = setOf(1,3,7,14,21,30,90,365)
+
+        return when{
+            streak in milestones -> true
+            streak in 31..<90 -> (streak-30) % 7 == 0
+            streak in 91..<365 -> (streak-90) % 30 == 0
+            streak > 365 -> streak % 365 == 0
+            else -> false
         }
     }
 
@@ -110,11 +124,5 @@ class HomeViewModel @Inject constructor(
 
     fun deleteHabit(habit: Habit) = viewModelScope.launch {
         if (habit.isChallenge) deleteChallengeUseCase(habit.category) else deleteHabitUseCase(habit)
-    }
-    fun getHabitFlow(habitId: Int): Flow<Habit?> {
-        return habits.map { list -> list.find { it.id == habitId } }
-    }
-    fun getHabitHistory(habitId: Int): Flow<List<HabitEntry>> {
-        return habitRepository.getHistory(habitId)
     }
 }

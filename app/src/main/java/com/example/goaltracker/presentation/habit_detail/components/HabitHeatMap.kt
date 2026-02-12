@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,26 +14,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.goaltracker.core.common.ui.components.DateRangeSelector
 import com.example.goaltracker.core.model.HabitType
 import com.example.goaltracker.core.theme.ErrorColor
 import com.example.goaltracker.core.theme.SuccessColor
+import com.example.goaltracker.presentation.habit_detail.model.HabitDetailViewModel
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun HabitHeatMap(
     completedDates: List<LocalDate>,
     habitType: HabitType,
-    startDate: LocalDate
+    startDate: LocalDate,
+    currentDate:LocalDate,
+    viewModel: HabitDetailViewModel = hiltViewModel()
 ) {
-    val currentMonth = remember { YearMonth.now() }
+    val selectedDate by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val currentMonth = remember(currentDate) { YearMonth.from(currentDate) }
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value
     val today = LocalDate.now()
-
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
     val emptyDayColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     val todayColor = MaterialTheme.colorScheme.surfaceVariant
@@ -44,14 +48,15 @@ fun HabitHeatMap(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("tr"))} ${currentMonth.year}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = onSurfaceColor,
+        Spacer(modifier = Modifier.height(4.dp))
+        DateRangeSelector(
+            isWeekly = false,
+            currentDate = selectedDate,
+            onPrevClick = { viewModel.previousMonth() },
+            onNextClick = { viewModel.nextMonth() },
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
+        Spacer(modifier = Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             listOf("Pzt", "Sa", "Çrş", "Prş", "Cm", "Cmt", "Pzr").forEach { day ->
                 Text(
@@ -64,7 +69,7 @@ fun HabitHeatMap(
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         val totalSlots = daysInMonth + (firstDayOfWeek - 1)
         val rows = (totalSlots / 7) + if (totalSlots % 7 == 0) 0 else 1

@@ -10,10 +10,14 @@ import com.example.goaltracker.core.domain.usecase.habit.GetHabitsUseCase
 import com.example.goaltracker.core.domain.usecase.habit.UpdateHabitUseCase
 import com.example.goaltracker.core.model.Habit
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,6 +38,17 @@ class HabitDetailViewModel @Inject constructor(
 
     val history = getHabitHistoryUseCase(habitId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    val selectedDate = _selectedDate.asStateFlow()
+
+    fun previousMonth() {
+        _selectedDate.update { it.minusMonths(1) }
+    }
+
+    fun nextMonth() {
+        _selectedDate.update { it.plusMonths(1) }
+    }
 
     fun updateHabit(habit: Habit) {
         viewModelScope.launch {

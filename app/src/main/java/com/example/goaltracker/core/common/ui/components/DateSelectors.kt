@@ -1,4 +1,4 @@
-package com.example.goaltracker.presentation.goals.components
+package com.example.goaltracker.core.common.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

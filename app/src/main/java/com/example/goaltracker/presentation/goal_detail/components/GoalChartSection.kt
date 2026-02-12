@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.goaltracker.core.model.GoalHistoryEntity
 import com.example.goaltracker.presentation.goal_detail.model.ChartTimeRange
-import com.example.goaltracker.presentation.goals.components.DateRangeSelector
+import com.example.goaltracker.core.common.ui.components.DateRangeSelector
 import java.time.LocalDate
 
 @Composable

@@ -20,6 +20,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -61,7 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
 
     // 2. Navigasyon
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("androidx.navigation:navigation-compose:2.9.6")
 
     // 3. Room Database
     val roomVersion = "2.6.1"

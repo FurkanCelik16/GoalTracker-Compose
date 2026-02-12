@@ -18,7 +18,8 @@ class CheckChallengeProgressUseCase @Inject constructor(
         var areHabitsDone = true
         for (habit in habits) {
             val entry = habitRepository.getEntryForDate(habit.id, date)
-            if (entry == null) {
+            val isCompleted = (entry!=null) && (entry.amount >= habit.targetCount)
+            if (!isCompleted) {
                 areHabitsDone = false
                 break
             }
@@ -29,9 +30,9 @@ class CheckChallengeProgressUseCase @Inject constructor(
         val areSubGoalsDone = subGoals.all { subGoal ->
             if (subGoal.type == GoalType.RECURRING && subGoal.targetAmount > 0) {
                 val threshold = subGoal.targetAmount / 3.0f
-                subGoal.currentAmount >= threshold && subGoal.lastUpdateDate == date
+                subGoal.currentAmount >= threshold
             } else {
-                subGoal.currentAmount >= subGoal.targetAmount && subGoal.lastUpdateDate == date
+                subGoal.currentAmount >= subGoal.targetAmount
             }
         }
 

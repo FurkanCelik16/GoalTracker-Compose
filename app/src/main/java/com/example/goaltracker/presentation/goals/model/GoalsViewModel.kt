@@ -2,20 +2,25 @@ package com.example.goaltracker.presentation.goals.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
 import com.example.goaltracker.core.domain.usecase.goal.AddGoalUseCase
 import com.example.goaltracker.core.domain.usecase.goal.GetGoalsUseCase
+import com.example.goaltracker.core.domain.usecase.goal.UpdateGoalProgressUseCase
 import com.example.goaltracker.core.model.Goal
 import com.example.goaltracker.core.model.sampleChallenges
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class GoalsViewModel @Inject constructor(
     getGoalsUseCase: GetGoalsUseCase,
-    private val addGoalUseCase: AddGoalUseCase
+    private val addGoalUseCase: AddGoalUseCase,
+    private val updateGoalProgressUseCase: UpdateGoalProgressUseCase,
+    private val checkChallengeProgressUseCase: CheckChallengeProgressUseCase
 ) : ViewModel() {
 
     val goals = getGoalsUseCase()
@@ -30,6 +35,7 @@ class GoalsViewModel @Inject constructor(
             addGoalUseCase(goal)
         }
     }
+
     fun getChallengeIdByTitle(title: String): Int? {
         return sampleChallenges.find { it.title == title }?.id
     }

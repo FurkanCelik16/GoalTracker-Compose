@@ -15,7 +15,8 @@ import java.time.LocalDate
 @Composable
 fun HeatMapCard(
     completedDates: List<LocalDate>,
-    habit: Habit
+    habit: Habit,
+    currentDate: LocalDate = LocalDate.now(),
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -28,7 +29,8 @@ fun HeatMapCard(
         HabitHeatMap(
             habitType = habit.type,
             completedDates = completedDates,
-            startDate = habit.startDate
+            startDate = habit.startDate,
+            currentDate = currentDate
         )
     }
 }

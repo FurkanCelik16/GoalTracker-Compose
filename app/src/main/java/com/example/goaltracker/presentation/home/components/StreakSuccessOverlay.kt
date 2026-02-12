@@ -51,17 +51,32 @@ fun StreakSuccessOverlay(
 
     val message = remember(streak) {
         when {
-            streak >= 30 -> "YANIYOSUN FUAT ABİİ!"
+
+            streak == 365 -> "BİR YIL OLDU! 🎉\nArtık Sen Bir Efsanesin 👑"
+
+            streak > 365  ->  "Tam ${streak/365} Yıllık Seri! Bu İnanılmaz! \uD83C\uDFC6"
+
+            streak == 90 -> "90 GÜN DEVİRDİN!\nBu Artık Senin Yaşam Tarzın 💪"
+
+            streak > 90 ->  "Tam ${streak/30} Aylık Seri! Harika İlerliyorsun! \uD83C\uDF1F"
+
+            streak >= 30 -> "Tam $streak Günlük Seri!\nGözlerime İnanamıyorum 😱"
+
             streak >= 21 -> "Durdurulamıyorsun! 🚀"
-            streak >= 7 -> "Efsanesin. Devam ET!"
+
+            streak >= 14 -> "Hızına Yetişemiyoruz! 🤯"
+
+            streak >= 7 -> "Efsanesin. Devam ET! 🔥"
+
             streak >= 3 -> "Seri Yakalandı! ⚡"
+
             else -> "Harika Başlangıç! 🌱"
         }
     }
 
     LaunchedEffect(isVisible) {
         if (isVisible) {
-            delay(1000)
+            delay(2000)
             onAnimationFinished()
         }
     }

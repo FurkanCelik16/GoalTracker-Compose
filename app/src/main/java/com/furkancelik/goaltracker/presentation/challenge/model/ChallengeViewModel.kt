@@ -75,7 +75,8 @@ class ChallengeViewModel @Inject constructor(
                         endDate = endDate,
                         isChallengeMaster = false,
                         parentChallengeTitle = challenge.title,
-                        startDate = LocalDate.now()
+                        startDate = LocalDate.now(),
+                        lastUpdateDate = LocalDate.now()
                     )
                     goalRepository.insertGoal(newSubGoal)
                 }
@@ -86,14 +87,9 @@ class ChallengeViewModel @Inject constructor(
 
     fun cancelChallenge(challenge: Challenge, onComplete: () -> Unit) {
         viewModelScope.launch {
-            goalRepository.deleteGoalByTitle(challenge.title)
+            // Deletes by parent link so the user's own goals with the same name survive.
+            goalRepository.deleteGoalsByChallengeTitle(challenge.title)
             habitRepository.deleteHabitsByCategory(challenge.title)
-
-            challenge.goalsToAdd.forEach { blueprint ->
-                if (blueprint.type != GoalType.BINARY) {
-                    goalRepository.deleteGoalByTitle(blueprint.title)
-                }
-            }
 
             onComplete()
         }

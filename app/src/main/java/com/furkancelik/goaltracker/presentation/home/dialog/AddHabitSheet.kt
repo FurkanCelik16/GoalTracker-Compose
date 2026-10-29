@@ -305,6 +305,19 @@ fun AddHabitSheet(
                     )
                 }
 
+                val scheduleError = when {
+                    period == Period.WEEKLY && selectedDays.isEmpty() -> "En az bir gün seçin"
+                    period == Period.CUSTOM && (periodIntervalString.toIntOrNull() ?: 0) < 1 -> "Tekrar aralığı en az 1 gün olmalı"
+                    else -> null
+                }
+                if (showError && scheduleError != null) {
+                    Text(
+                        text = scheduleError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -371,10 +384,16 @@ fun AddHabitSheet(
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            val isScheduleValid = when (period) {
+                Period.WEEKLY -> selectedDays.isNotEmpty()
+                Period.CUSTOM -> (periodIntervalString.toIntOrNull() ?: 0) >= 1
+                else -> true
+            }
+
             Button(
                 onClick = {
-                    if (name.isNotBlank() && category.isNotBlank()) {
-                        val interval = periodIntervalString.toIntOrNull() ?: 1
+                    if (name.isNotBlank() && category.isNotBlank() && isScheduleValid) {
+                        val interval = periodIntervalString.toIntOrNull()?.coerceAtLeast(1) ?: 1
                         onSave(name.trim(), category.trim(), period, difficulty, type, timeOfDay, selectedDays, interval, targetCount)
                         onDismiss()
                     } else {

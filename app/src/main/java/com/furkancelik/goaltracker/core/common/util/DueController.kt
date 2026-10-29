@@ -15,7 +15,8 @@ fun Habit.isDueOn(date: LocalDate): Boolean {
         }
         Period.CUSTOM -> {
             val daysBetween = ChronoUnit.DAYS.between(startDate, date)
-            daysBetween % periodInterval == 0L
+            // Guards against habits saved with an interval of 0 before validation existed.
+            daysBetween % periodInterval.coerceAtLeast(1) == 0L
         }
     }
 }

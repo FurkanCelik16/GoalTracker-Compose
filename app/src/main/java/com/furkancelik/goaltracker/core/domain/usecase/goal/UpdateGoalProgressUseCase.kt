@@ -44,7 +44,8 @@ class UpdateGoalProgressUseCase @Inject constructor(
                 goal.currentAmount + amount
             }
 
-            repository.updateGoal(goal.copy(currentAmount = newGoalAmount))
+            val lastUpdate = if (goal.type == GoalType.RECURRING) LocalDate.now() else goal.lastUpdateDate
+            repository.updateGoal(goal.copy(currentAmount = newGoalAmount, lastUpdateDate = lastUpdate))
         }
 
         val historyEntity = existingEntry?.copy(

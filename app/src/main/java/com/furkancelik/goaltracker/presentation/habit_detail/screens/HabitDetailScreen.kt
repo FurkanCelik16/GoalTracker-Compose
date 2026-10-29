@@ -57,7 +57,7 @@ fun HabitDetailScreen(
     }
 
     val habit = habitState!!
-    val completedDates = historyState.map { it.date }
+    val completedDates = historyState.filter { it.amount >= habit.targetCount }.map { it.date }
 
     Scaffold(
         topBar = {

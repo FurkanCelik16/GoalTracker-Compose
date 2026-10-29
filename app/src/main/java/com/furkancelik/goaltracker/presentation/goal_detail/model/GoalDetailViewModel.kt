@@ -77,7 +77,7 @@ class GoalDetailViewModel @Inject constructor(
 
             val parentTitle = currentGoal.parentChallengeTitle
             if (parentTitle != null) {
-                checkChallengeProgressUseCase(parentTitle, LocalDate.now())
+                checkChallengeProgressUseCase(parentTitle)
             }
         }
     }
@@ -87,7 +87,7 @@ class GoalDetailViewModel @Inject constructor(
             updateGoalUseCase(updatedGoal)
 
             if (updatedGoal.parentChallengeTitle != null) {
-                checkChallengeProgressUseCase(updatedGoal.parentChallengeTitle, LocalDate.now())
+                checkChallengeProgressUseCase(updatedGoal.parentChallengeTitle)
             }
         }
     }
@@ -121,7 +121,7 @@ class GoalDetailViewModel @Inject constructor(
 
             val parentTitle = goal.parentChallengeTitle
             if (parentTitle != null) {
-                checkChallengeProgressUseCase(parentTitle, date)
+                checkChallengeProgressUseCase(parentTitle)
             }
         }
     }

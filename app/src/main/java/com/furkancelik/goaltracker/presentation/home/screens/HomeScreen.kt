@@ -3,6 +3,7 @@ package com.furkancelik.goaltracker.presentation.home.screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.furkancelik.goaltracker.presentation.home.components.HabitContainerCard
@@ -20,6 +21,11 @@ fun HomeScreen(
     val entries by viewModel.dailyEntries.collectAsStateWithLifecycle()
     val streakToAnimate by viewModel.streakAnimationTrigger.collectAsStateWithLifecycle()
     val showFailureAnim by viewModel.streakFailureTrigger.collectAsStateWithLifecycle()
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
 
 
     HomeContent(

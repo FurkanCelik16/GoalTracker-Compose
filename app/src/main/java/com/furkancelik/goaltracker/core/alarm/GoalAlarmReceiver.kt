@@ -23,21 +23,12 @@ class GoalAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val goalId = intent.getIntExtra("GOAL_ID", -1)
-        val defaultTitle = context.getString(R.string.notification_default_title)
-        val title = intent.getStringExtra("TITLE") ?: defaultTitle
-
         if (goalId == -1) return
 
         Log.d("GoalAlarmReceiver", "Alarm Tetiklendi! ID: $goalId")
 
         val message = context.getString(R.string.notification_default_message)
 
-        NotificationHelper.showNotification(
-            context,
-            goalId,
-            title,
-            message
-        )
         val entryPoint = EntryPointAccessors.fromApplication(
             context.applicationContext,
             GoalAlarmReceiverEntryPoint::class.java
@@ -50,7 +41,9 @@ class GoalAlarmReceiver : BroadcastReceiver() {
             try {
                 val goal = repository.getGoalById(goalId).first()
 
+                // A deleted or disabled goal may still have a stale alarm; drop it silently.
                 if (goal != null && !goal.isArchived && goal.reminderType != ReminderType.NONE) {
+                    NotificationHelper.showNotification(context, goalId, goal.title, message)
                     AlarmScheduler.scheduleAlarm(context, goal)
                 }
             } catch (e: Exception) {

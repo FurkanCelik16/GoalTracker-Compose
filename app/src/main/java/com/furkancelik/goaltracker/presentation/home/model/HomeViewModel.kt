@@ -5,9 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.furkancelik.goaltracker.core.domain.repository.HabitRepository
 import com.furkancelik.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
 import com.furkancelik.goaltracker.core.domain.usecase.challenge.DeleteChallengeUseCase
-import com.furkancelik.goaltracker.core.domain.usecase.goal.CheckAndResetRecurringGoalsUseCase
 import com.furkancelik.goaltracker.core.domain.usecase.habit.*
-import com.furkancelik.goaltracker.core.domain.usecase.logic.RefreshStreaksUseCase
 import com.furkancelik.goaltracker.core.domain.usecase.logic.ToggleHabitUseCase
 import com.furkancelik.goaltracker.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,11 +22,9 @@ class HomeViewModel @Inject constructor(
     private val toggleHabitUseCase: ToggleHabitUseCase,
     private val updateHabitUseCase: UpdateHabitUseCase,
     private val deleteHabitUseCase: DeleteHabitUseCase,
-    private val refreshStreaksUseCase: RefreshStreaksUseCase,
     private val getHabitByIdUseCase: GetHabitByIdUseCase,
     private val habitRepository: HabitRepository,
     private val deleteChallengeUseCase: DeleteChallengeUseCase,
-    private val checkAndResetRecurringGoalsUseCase: CheckAndResetRecurringGoalsUseCase,
     private val checkChallengeProgressUseCase: CheckChallengeProgressUseCase
 ) : ViewModel() {
 
@@ -59,11 +55,14 @@ class HomeViewModel @Inject constructor(
         }.keys.toList()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    init {
-        viewModelScope.launch {
-            refreshStreaksUseCase()
-            checkAndResetRecurringGoalsUseCase()
-        }
+    private var knownToday = LocalDate.now()
+
+    // Moves the selection to the new day if the app was left open on "today" past midnight.
+    fun onResume() {
+        val today = LocalDate.now()
+        if (today == knownToday) return
+        if (_selectedDate.value == knownToday) _selectedDate.value = today
+        knownToday = today
     }
 
     fun toggleHabit(habit: Habit) {
@@ -77,7 +76,7 @@ class HomeViewModel @Inject constructor(
             toggleHabitUseCase(habit, currentDate)
 
             if (habit.isChallenge) {
-                checkChallengeProgressUseCase(habit.category, currentDate)
+                checkChallengeProgressUseCase(habit.category)
             }
             if (currentDate == LocalDate.now()) {
 

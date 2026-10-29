@@ -12,7 +12,7 @@ class RefreshStreaksUseCase @Inject constructor(
 
         habits.forEach { habit ->
             val history = repository.getHistorySync(habit.id)
-            val completedDates = history.map { it.date }
+            val completedDates = history.filter { it.amount >= habit.targetCount }.map { it.date }
 
             val correctStreak = StreakCalculator.calculate(
                 habit = habit,

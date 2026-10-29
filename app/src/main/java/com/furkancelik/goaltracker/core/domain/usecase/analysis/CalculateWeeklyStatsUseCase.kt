@@ -1,0 +1,66 @@
+package com.furkancelik.goaltracker.core.domain.usecase.analysis
+
+import com.furkancelik.goaltracker.core.domain.repository.AnalysisRepository
+import com.furkancelik.goaltracker.core.domain.repository.HabitRepository
+import com.furkancelik.goaltracker.core.model.HabitDifficulty
+import com.furkancelik.goaltracker.core.model.HabitType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
+import javax.inject.Inject
+
+class CalculateWeeklyStatsUseCase @Inject constructor(
+    private val habitRepository: HabitRepository,
+    private val analysisRepository: AnalysisRepository
+) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    operator fun invoke(selectedDateFlow: Flow<LocalDate>): Flow<List<Pair<String, Int>>> {
+        return combine(
+            selectedDateFlow,
+            habitRepository.allHabits,
+            selectedDateFlow.flatMapLatest { date ->
+                analysisRepository.getEntriesForDateRange(date.minusDays(6), date)
+            }
+        ) { endDate, habits, entries ->
+            val startDate = endDate.minusDays(6)
+            val stats = mutableListOf<Pair<String, Int>>()
+
+            for (i in 0..6) {
+                val dateToCheck = startDate.plusDays(i.toLong())
+                val entriesAtDate = entries
+                    .filter { it.date == dateToCheck }
+                    .associateBy { it.habitId }
+
+                val dailyScore = habits.sumOf{ habit ->
+                    if (dateToCheck.isBefore(habit.startDate)) {
+                        return@sumOf 0
+                    }
+                    val entry = entriesAtDate[habit.id]
+                    val isMarked = entry != null && entry.amount >= habit.targetCount
+
+                    val points:Int = when (habit.difficulty) {
+                        HabitDifficulty.HARD -> 20
+                        HabitDifficulty.MEDIUM -> 10
+                        HabitDifficulty.EASY -> 5
+                    }
+                    when(habit.type){
+                        HabitType.POSITIVE -> {
+                            if(isMarked) points else 0
+                        }
+                        HabitType.NEGATIVE -> {
+                            if(!isMarked) points else 0
+                        }
+                    }
+                }
+
+                val dayName = dateToCheck.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("tr"))
+                stats.add(dayName to dailyScore)
+            }
+            stats
+        }
+    }
+}

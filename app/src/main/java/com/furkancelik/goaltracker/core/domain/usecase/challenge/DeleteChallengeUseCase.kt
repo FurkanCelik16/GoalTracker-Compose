@@ -1,0 +1,15 @@
+package com.furkancelik.goaltracker.core.domain.usecase.challenge
+
+import com.furkancelik.goaltracker.core.domain.repository.GoalRepository
+import com.furkancelik.goaltracker.core.domain.repository.HabitRepository
+import javax.inject.Inject
+
+class DeleteChallengeUseCase @Inject constructor(
+    private val goalRepository: GoalRepository,
+    private val habitRepository: HabitRepository
+) {
+    suspend operator fun invoke(challengeTitle: String) {
+        goalRepository.deleteGoalsByChallengeTitle(challengeTitle)
+        habitRepository.deleteHabitsByCategory(challengeTitle)
+    }
+}

@@ -1,0 +1,45 @@
+package com.furkancelik.goaltracker.presentation.goals.model
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.furkancelik.goaltracker.core.domain.usecase.challenge.CheckChallengeProgressUseCase
+import com.furkancelik.goaltracker.core.domain.usecase.goal.AddGoalUseCase
+import com.furkancelik.goaltracker.core.domain.usecase.goal.GetGoalsUseCase
+import com.furkancelik.goaltracker.core.domain.usecase.goal.UpdateGoalProgressUseCase
+import com.furkancelik.goaltracker.core.model.Goal
+import com.furkancelik.goaltracker.core.model.sampleChallenges
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import javax.inject.Inject
+
+@HiltViewModel
+class GoalsViewModel @Inject constructor(
+    getGoalsUseCase: GetGoalsUseCase,
+    private val addGoalUseCase: AddGoalUseCase,
+    private val updateGoalProgressUseCase: UpdateGoalProgressUseCase,
+    private val checkChallengeProgressUseCase: CheckChallengeProgressUseCase
+) : ViewModel() {
+
+    val goals = getGoalsUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
+    fun addGoal(goal: Goal) {
+        viewModelScope.launch {
+            addGoalUseCase(goal)
+        }
+    }
+
+    fun getChallengeIdByTitle(title: String): Int? {
+        return sampleChallenges.find { it.title == title }?.id
+    }
+
+
+
+}

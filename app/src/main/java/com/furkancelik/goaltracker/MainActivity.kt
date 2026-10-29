@@ -1,0 +1,186 @@
+package com.furkancelik.goaltracker
+
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.furkancelik.goaltracker.core.common.ui.components.BottomMenu
+import com.furkancelik.goaltracker.core.common.util.SplashManager
+import com.furkancelik.goaltracker.core.theme.GoalTrackerTheme
+import com.furkancelik.goaltracker.presentation.analysis.screens.AnalysisScreen
+import com.furkancelik.goaltracker.presentation.challenge.screens.ChallengeDetailScreen
+import com.furkancelik.goaltracker.presentation.challenge.screens.ChallengeScreen
+import com.furkancelik.goaltracker.presentation.goal_detail.screens.GoalDetailScreen
+import com.furkancelik.goaltracker.presentation.goals.screen.GoalsScreen
+import com.furkancelik.goaltracker.presentation.habit_detail.screens.HabitDetailScreen
+import com.furkancelik.goaltracker.presentation.home.screens.HomeScreen
+import com.furkancelik.goaltracker.presentation.main.MainViewModel
+import com.furkancelik.goaltracker.presentation.navigation.GoalTrackerDestinations
+import com.furkancelik.goaltracker.presentation.onboarding.OnboardingScreen
+import com.furkancelik.goaltracker.presentation.settings.screens.SettingsScreen
+import com.furkancelik.goaltracker.presentation.splash.AppSplashScreen
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    private val mainViewModel: MainViewModel by viewModels()
+    override fun onResume() {
+        super.onResume()
+        mainViewModel.onAppResumed()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        val splashScreen = installSplashScreen()
+        super.onCreate(savedInstanceState)
+
+        splashScreen.setKeepOnScreenCondition {
+            mainViewModel.isLoading.value
+        }
+        setContent {
+            val systemTheme = isSystemInDarkTheme()
+            val isDarkModeConfig by mainViewModel.isDarkMode.collectAsStateWithLifecycle()
+            val useDarkTheme = isDarkModeConfig ?: systemTheme
+            val isOnboardingCompleted by mainViewModel.isOnboardingCompleted.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+            val splashManager = remember { SplashManager(context) }
+            val startDest = if (splashManager.shouldShowSplash()) {
+                GoalTrackerDestinations.Splash.route
+            } else {
+                GoalTrackerDestinations.Home.route
+            }
+
+            GoalTrackerTheme(darkTheme = useDarkTheme) {
+                val navController = rememberNavController()
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+                val noBottomBarRoutes = listOf(
+                    GoalTrackerDestinations.Splash.route,
+                    GoalTrackerDestinations.Onboarding.route
+                )
+                val showBottomBar = currentRoute !in noBottomBarRoutes
+
+                Scaffold(
+                    bottomBar = {
+                        if (showBottomBar) {
+                            BottomMenu(navController = navController)
+                        }
+                    }
+                ) { innerPadding ->
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = startDest,
+                        modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+                    ) {
+
+                        composable(GoalTrackerDestinations.Splash.route) {
+                            AppSplashScreen(
+                                onNavigateToNext = {
+                                    if (isOnboardingCompleted) {
+                                        navController.navigate(GoalTrackerDestinations.Home.route) {
+                                            popUpTo(GoalTrackerDestinations.Splash.route) { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.navigate(GoalTrackerDestinations.Onboarding.route) {
+                                            popUpTo(GoalTrackerDestinations.Splash.route) { inclusive = true }
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        composable(GoalTrackerDestinations.Onboarding.route) {
+                            OnboardingScreen(
+                                onFinished = {
+                                    mainViewModel.completeOnboarding()
+                                    navController.navigate(GoalTrackerDestinations.Home.route) {
+                                        popUpTo(GoalTrackerDestinations.Onboarding.route) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                        composable(GoalTrackerDestinations.Home.route) {
+                            HomeScreen(navController = navController)
+                        }
+
+                        // 2. HABIT DETAIL
+                        composable(
+                            route = GoalTrackerDestinations.HabitDetail.route,
+                            arguments = listOf(navArgument("habitId") { type = NavType.IntType })
+                        ) { _ ->
+                            HabitDetailScreen(navController)
+                        }
+
+                        // 3. İSTATİSTİKLER
+                        composable(route = GoalTrackerDestinations.Stats.route) {
+                            AnalysisScreen()
+                        }
+
+                        // 4. HEDEFLER EKRANI (GOALS)
+                        composable(route = GoalTrackerDestinations.Goals.route) {
+                            GoalsScreen(
+                                onGoalClick = { goalId ->
+                                    navController.navigate(GoalTrackerDestinations.GoalDetail.createRoute(goalId))
+                                },
+                                onChallengeClick = { challengeId ->
+                                    navController.navigate(GoalTrackerDestinations.ChallengeDetail.createRoute(challengeId))
+                                }
+                            )
+                        }
+
+                        // 5. HEDEF DETAYI
+                        composable(
+                            route = GoalTrackerDestinations.GoalDetail.route,
+                            arguments = listOf(navArgument("goalId") { type = NavType.IntType })
+                        ) {
+                            GoalDetailScreen(
+                                onBackClick = { navController.popBackStack() }
+                            )
+                        }
+
+                        // 6. MÜCADELELER LİSTESİ
+                        composable(GoalTrackerDestinations.Challenges.route) {
+                            ChallengeScreen(onNavigateToDetail = { challengeId ->
+                                navController.navigate(
+                                    GoalTrackerDestinations.ChallengeDetail.createRoute(challengeId)
+                                )
+                            })
+                        }
+
+                        composable(
+                            route = GoalTrackerDestinations.ChallengeDetail.route,
+                            arguments = listOf(navArgument("challengeId") { type = NavType.IntType })
+                        ) { _ ->
+                            ChallengeDetailScreen(
+                                onBack = { navController.popBackStack() },
+                            )
+                        }
+
+                        // 8. AYARLAR
+                        composable(GoalTrackerDestinations.Settings.route) {
+                             SettingsScreen()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

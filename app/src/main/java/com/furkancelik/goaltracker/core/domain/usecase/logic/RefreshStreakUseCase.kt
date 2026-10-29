@@ -1,0 +1,27 @@
+package com.furkancelik.goaltracker.core.domain.usecase.logic
+
+import com.furkancelik.goaltracker.core.domain.repository.HabitRepository
+import com.furkancelik.goaltracker.core.domain.util.StreakCalculator
+import javax.inject.Inject
+
+class RefreshStreaksUseCase @Inject constructor(
+    private val repository: HabitRepository
+) {
+    suspend operator fun invoke() {
+        val habits = repository.getAllHabitsSync()
+
+        habits.forEach { habit ->
+            val history = repository.getHistorySync(habit.id)
+            val completedDates = history.filter { it.amount >= habit.targetCount }.map { it.date }
+
+            val correctStreak = StreakCalculator.calculate(
+                habit = habit,
+                completedDates = completedDates
+            )
+
+            if (habit.streak != correctStreak) {
+                repository.updateHabit(habit.copy(streak = correctStreak))
+            }
+        }
+    }
+}

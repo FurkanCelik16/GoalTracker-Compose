@@ -1,0 +1,54 @@
+package com.furkancelik.goaltracker.presentation.settings.model
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.furkancelik.goaltracker.core.alarm.AlarmScheduler
+import com.furkancelik.goaltracker.core.domain.repository.GoalRepository
+import com.furkancelik.goaltracker.core.domain.repository.HabitRepository
+import com.furkancelik.goaltracker.core.domain.repository.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val goalRepository: GoalRepository,
+    private val habitRepository: HabitRepository,
+    private val settingsRepository: SettingsRepository,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
+
+    val isDarkMode = settingsRepository.isDarkMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val isSoundOn = settingsRepository.isSoundOn
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val userName = settingsRepository.userName
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Misafir")
+
+    fun toggleDarkMode(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setDarkMode(enabled) }
+    }
+
+    fun toggleSound(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setSound(enabled) }
+    }
+
+    fun updateName(name: String) {
+        viewModelScope.launch { settingsRepository.setUserName(name) }
+    }
+
+    fun resetAllData() {
+        viewModelScope.launch {
+            goalRepository.allGoals.first().forEach { AlarmScheduler.cancelAlarm(context, it.id) }
+            goalRepository.deleteAllGoals()
+            habitRepository.deleteAllHabits()
+        }
+    }
+}
